@@ -67,7 +67,16 @@ export default function Dashboard() {
 
   async function fetchBills() {
     setLoading(true);
-    const { data } = await supabase.from('bills').select('*').order('created_at', { ascending: true });
+    // 取得目前登入的 user
+    const { data: userData } = await supabase.auth.getUser();
+    const user = userData?.user;
+    if (!user) {
+      setBills([]);
+      setLoading(false);
+      return;
+    }
+    // 查詢只屬於這個 user 的資料
+    const { data } = await supabase.from('bills').select('*').eq('user_id', user.id).order('created_at', { ascending: true });
     if (data) {
       // 以 name.trim() 分組加總，只顯示 name 不為空的資料
       const sumMap = {};
@@ -200,7 +209,16 @@ export default function Dashboard() {
     await fetchHistoryBills(historyDate);
   }
   async function fetchHistoryBills(date) {
-    const { data } = await supabase.from('bills').select('*').eq('date', date).order('created_at', { ascending: true });
+    // 取得目前登入的 user
+    const { data: userData } = await supabase.auth.getUser();
+    const user = userData?.user;
+    if (!user) {
+      setHistoryBills([]);
+      setHistoryEdit({});
+      return;
+    }
+    // 查詢只屬於這個 user 的資料
+    const { data } = await supabase.from('bills').select('*').eq('date', date).eq('user_id', user.id).order('created_at', { ascending: true });
     setHistoryBills(data || []);
     setHistoryEdit({});
   }
