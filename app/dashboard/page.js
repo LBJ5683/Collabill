@@ -33,7 +33,6 @@ export default function Dashboard() {
   const [modalValues, setModalValues] = useState({});
   const [modalMsg, setModalMsg] = useState('');
   const [modalDate, setModalDate] = useState(() => new Date().toISOString().slice(0, 10));
-  const [modalQueried, setModalQueried] = useState(false);
 
   // 刪除確認
   const [deleteId, setDeleteId] = useState(null);
@@ -125,7 +124,6 @@ export default function Dashboard() {
     setModalValues({});
     setModalMsg('');
     setModalDate(new Date().toISOString().slice(0, 10));
-    setModalQueried(true);
     setShowModal(true);
   }
   async function handleModalSubmit(e) {
@@ -166,17 +164,6 @@ export default function Dashboard() {
     setShowModal(false);
     setModalValues({});
     fetchBills();
-  }
-
-  // 查詢該日期現有數據
-  async function handleModalQuery() {
-    const { data } = await supabase.from('bills').select('*').eq('date', modalDate);
-    const values = {};
-    (data || []).forEach(bill => {
-      values[bill.id] = bill[modalField] || '';
-    });
-    setModalValues(values);
-    setModalQueried(true);
   }
 
   // 刪除參與者
