@@ -67,8 +67,8 @@ export default function Dashboard() {
 
   async function fetchBills() {
     setLoading(true);
-    const { data, error } = await supabase.from('bills').select('*').order('created_at', { ascending: true });
-    if (!error) {
+    const { data } = await supabase.from('bills').select('*').order('created_at', { ascending: true });
+    if (data) {
       // 以 name.trim() 分組加總，只顯示 name 不為空的資料
       const sumMap = {};
       (data || []).forEach(bill => {
@@ -200,7 +200,7 @@ export default function Dashboard() {
     await fetchHistoryBills(historyDate);
   }
   async function fetchHistoryBills(date) {
-    const { data, error } = await supabase.from('bills').select('*').eq('date', date).order('created_at', { ascending: true });
+    const { data } = await supabase.from('bills').select('*').eq('date', date).order('created_at', { ascending: true });
     setHistoryBills(data || []);
     setHistoryEdit({});
   }
