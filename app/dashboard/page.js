@@ -114,8 +114,16 @@ export default function Dashboard() {
       return;
     }
     const today = getToday();
+    // 取得目前登入的 user
+    const { data: userData } = await supabase.auth.getUser();
+    const user = userData?.user;
+    if (!user) {
+      setAddMsg('請先登入');
+      return;
+    }
+    // 新增時要帶上 user_id
     const { error } = await supabase.from('bills').insert([
-      { name: newName.trim(), amount_in: 0, food: 0, drink: 0, other: 0, date: today }
+      { name: newName.trim(), amount_in: 0, food: 0, drink: 0, other: 0, date: today, user_id: user.id }
     ]);
     if (error) {
       setAddMsg('新增失敗，請重試');
@@ -138,12 +146,19 @@ export default function Dashboard() {
   async function handleModalSubmit(e) {
     e.preventDefault();
     setModalMsg('');
+    // 取得目前登入的 user
+    const { data: userData } = await supabase.auth.getUser();
+    const user = userData?.user;
+    if (!user) {
+      setModalMsg('請先登入');
+      return;
+    }
     for (const id in modalValues) {
       let value = modalValues[id];
       if (value === '' || value === undefined) value = 0;
       if (!isNaN(Number(value))) {
         // 查詢該 id、modalDate 是否有資料
-        const { data: exist } = await supabase.from('bills').select('*').eq('name', bills.find(b => b.id === id)?.name).eq('date', modalDate);
+        const { data: exist } = await supabase.from('bills').select('*').eq('name', bills.find(b => b.id === id)?.name).eq('date', modalDate).eq('user_id', user.id);
         if (exist && exist.length > 0) {
           // 有資料就 update，保留其他欄位
           const old = exist[0];
@@ -164,7 +179,8 @@ export default function Dashboard() {
               food: modalField === 'food' ? Number(value) : 0,
               drink: modalField === 'drink' ? Number(value) : 0,
               other: modalField === 'other' ? Number(value) : 0,
-              date: modalDate
+              date: modalDate,
+              user_id: user.id
             }
           ]);
         }
