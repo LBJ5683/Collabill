@@ -32,7 +32,8 @@ export default function Dashboard() {
   const [modalField, setModalField] = useState('amount_in');
   const [modalValues, setModalValues] = useState({});
   const [modalMsg, setModalMsg] = useState('');
-  const [modalDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [modalDate, setModalDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [modalQueried, setModalQueried] = useState(false);
 
   // 刪除確認
   const [deleteId, setDeleteId] = useState(null);
@@ -67,9 +68,26 @@ export default function Dashboard() {
 
   async function fetchBills() {
     setLoading(true);
-    const today = getToday();
-    const { data, error } = await supabase.from('bills').select('*').eq('date', today).order('created_at', { ascending: true });
-    if (!error) setBills(data || []);
+    const { data, error } = await supabase.from('bills').select('*').order('created_at', { ascending: true });
+    if (!error) {
+      // 以 name.trim() 分組加總，只顯示 name 不為空的資料
+      const sumMap = {};
+      (data || []).forEach(bill => {
+        const key = bill.name ? bill.name.trim() : '';
+        if (!key) return; // 跳過 name 為空
+        if (!sumMap[key]) {
+          sumMap[key] = { ...bill, name: key };
+        } else {
+          sumMap[key].amount_in += bill.amount_in || 0;
+          sumMap[key].food += bill.food || 0;
+          sumMap[key].drink += bill.drink || 0;
+          sumMap[key].other += bill.other || 0;
+        }
+      });
+      setBills(Object.values(sumMap));
+    } else {
+      setBills([]);
+    }
     setLoading(false);
   }
 
@@ -106,22 +124,59 @@ export default function Dashboard() {
     setModalField(field);
     setModalValues({});
     setModalMsg('');
+    setModalDate(new Date().toISOString().slice(0, 10));
+    setModalQueried(true);
     setShowModal(true);
   }
   async function handleModalSubmit(e) {
     e.preventDefault();
     setModalMsg('');
-    const today = getToday();
     for (const id in modalValues) {
       let value = modalValues[id];
       if (value === '' || value === undefined) value = 0;
       if (!isNaN(Number(value))) {
-        await supabase.from('bills').update({ [modalField]: Number(value) }).eq('id', id).eq('date', today);
+        // 查詢該 id、modalDate 是否有資料
+        const { data: exist } = await supabase.from('bills').select('*').eq('name', bills.find(b => b.id === id)?.name).eq('date', modalDate);
+        if (exist && exist.length > 0) {
+          // 有資料就 update，保留其他欄位
+          const old = exist[0];
+          const updateObj = {
+            amount_in: modalField === 'amount_in' ? Number(value) : old.amount_in || 0,
+            food: modalField === 'food' ? Number(value) : old.food || 0,
+            drink: modalField === 'drink' ? Number(value) : old.drink || 0,
+            other: modalField === 'other' ? Number(value) : old.other || 0,
+          };
+          await supabase.from('bills').update(updateObj).eq('id', old.id);
+        } else {
+          // 沒資料就 insert，四欄位都齊全
+          const bill = bills.find(b => b.id === id);
+          await supabase.from('bills').insert([
+            {
+              name: bill ? bill.name.trim() : '',
+              amount_in: modalField === 'amount_in' ? Number(value) : 0,
+              food: modalField === 'food' ? Number(value) : 0,
+              drink: modalField === 'drink' ? Number(value) : 0,
+              other: modalField === 'other' ? Number(value) : 0,
+              date: modalDate
+            }
+          ]);
+        }
       }
     }
     setShowModal(false);
     setModalValues({});
     fetchBills();
+  }
+
+  // 查詢該日期現有數據
+  async function handleModalQuery() {
+    const { data } = await supabase.from('bills').select('*').eq('date', modalDate);
+    const values = {};
+    (data || []).forEach(bill => {
+      values[bill.id] = bill[modalField] || '';
+    });
+    setModalValues(values);
+    setModalQueried(true);
   }
 
   // 刪除參與者
@@ -142,7 +197,8 @@ export default function Dashboard() {
       return;
     }
     if (!window.confirm(`確定要刪除「${target.name}」嗎？此動作無法復原。`)) return;
-    await supabase.from('bills').delete().eq('id', deleteId);
+    // 一次刪除這個人所有資料
+    await supabase.from('bills').delete().eq('name', target.name);
     setShowDeleteDialog(false);
     setDeleteId(null);
     setDeleteName('');
