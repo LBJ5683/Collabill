@@ -420,7 +420,7 @@ export default function Dashboard() {
                   >查詢</button>
                 </div>
                 {historyQueried && (
-                  <div className="overflow-x-auto rounded-xl shadow bg-white/95 border border-blue-200 mb-4">
+                  <div className="overflow-x-auto rounded-xl shadow bg-white/95 border border-blue-200 mb-4 max-h-[400px] overflow-auto">
                     <table className="min-w-full text-center">
                       <thead className="bg-blue-50 text-blue-700">
                         <tr>
