@@ -238,12 +238,6 @@ export default function Dashboard() {
     setHistoryBills(data || []);
     setHistoryEdit({});
   }
-  function handleHistoryEdit(id, field, value) {
-    setHistoryEdit(edit => ({
-      ...edit,
-      [id]: { ...edit[id], [field]: value }
-    }));
-  }
   async function saveHistoryEdit() {
     for (const id in historyEdit) {
       const updateObj = {};
