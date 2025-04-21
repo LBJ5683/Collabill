@@ -525,7 +525,7 @@ export default function Dashboard() {
               {addMsg && <div className="ml-4 text-red-500">{addMsg}</div>}
             </form>
           )}
-          <div className="overflow-x-auto rounded-xl shadow-lg bg-white/95 border border-blue-200">
+          <div className="overflow-x-auto rounded-xl shadow-lg bg-white/95 border border-blue-200 max-h-[500px] overflow-auto">
             <table className="min-w-full text-center">
               <thead className="bg-blue-100 text-blue-700">
                 <tr>

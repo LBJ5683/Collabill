@@ -11,8 +11,9 @@ export default function Login() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    const fakeEmail = `${name}@fake.com`;
-    const { error } = await supabase.auth.signInWithPassword({ email: fakeEmail, password });
+    // 如果輸入內容包含 @ 則直接當 email，否則自動補 @fake.com
+    const email = name.includes('@') ? name : `${name}@fake.com`;
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) setMsg(error.message);
     else router.push('/dashboard');
   }
@@ -25,7 +26,7 @@ export default function Login() {
         <form onSubmit={handleSubmit}>
           <input
             className="block w-full mb-4 p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-            placeholder="名字"
+            placeholder="名字或 Email"
             value={name}
             onChange={e => setName(e.target.value)}
             required
