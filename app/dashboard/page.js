@@ -439,10 +439,78 @@ export default function Dashboard() {
                           <tr key={bill.id}>
                             <td className="px-2 py-2">{idx + 1}</td>
                             <td className="px-4 py-2">{bill.name}</td>
-                            <td className="px-4 py-2">{bill.amount_in || 0}</td>
-                            <td className="px-4 py-2">{bill.food || 0}</td>
-                            <td className="px-4 py-2">{bill.drink || 0}</td>
-                            <td className="px-4 py-2">{bill.other || 0}</td>
+                            <td className="px-4 py-2">
+                              <input
+                                type="number"
+                                className="w-20 p-1 border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                value={
+                                  historyEdit[bill.id]?.amount_in !== undefined
+                                    ? historyEdit[bill.id].amount_in
+                                    : bill.amount_in || ''
+                                }
+                                onChange={e =>
+                                  setHistoryEdit(edit => ({
+                                    ...edit,
+                                    [bill.id]: { ...edit[bill.id], amount_in: e.target.value }
+                                  }))
+                                }
+                                disabled={historyViewMode !== 'edit'}
+                              />
+                            </td>
+                            <td className="px-4 py-2">
+                              <input
+                                type="number"
+                                className="w-20 p-1 border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                value={
+                                  historyEdit[bill.id]?.food !== undefined
+                                    ? historyEdit[bill.id].food
+                                    : bill.food || ''
+                                }
+                                onChange={e =>
+                                  setHistoryEdit(edit => ({
+                                    ...edit,
+                                    [bill.id]: { ...edit[bill.id], food: e.target.value }
+                                  }))
+                                }
+                                disabled={historyViewMode !== 'edit'}
+                              />
+                            </td>
+                            <td className="px-4 py-2">
+                              <input
+                                type="number"
+                                className="w-20 p-1 border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                value={
+                                  historyEdit[bill.id]?.drink !== undefined
+                                    ? historyEdit[bill.id].drink
+                                    : bill.drink || ''
+                                }
+                                onChange={e =>
+                                  setHistoryEdit(edit => ({
+                                    ...edit,
+                                    [bill.id]: { ...edit[bill.id], drink: e.target.value }
+                                  }))
+                                }
+                                disabled={historyViewMode !== 'edit'}
+                              />
+                            </td>
+                            <td className="px-4 py-2">
+                              <input
+                                type="number"
+                                className="w-20 p-1 border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                value={
+                                  historyEdit[bill.id]?.other !== undefined
+                                    ? historyEdit[bill.id].other
+                                    : bill.other || ''
+                                }
+                                onChange={e =>
+                                  setHistoryEdit(edit => ({
+                                    ...edit,
+                                    [bill.id]: { ...edit[bill.id], other: e.target.value }
+                                  }))
+                                }
+                                disabled={historyViewMode !== 'edit'}
+                              />
+                            </td>
                           </tr>
                         ))}
                       </tbody>
