@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import { useRouter } from 'next/navigation';
+import Head from 'next/head';
 
 export default function Login() {
   const [name, setName] = useState('');
@@ -19,44 +20,54 @@ export default function Login() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-100 to-blue-300">
-      <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8">
-        <h1 className="text-3xl font-bold text-center text-blue-700 mb-2">多人分賬系統</h1>
-        <h2 className="text-xl font-semibold text-center mb-6">登入</h2>
-        <form onSubmit={handleSubmit}>
-          <input
-            className="block w-full mb-4 p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-            placeholder="名字或 Email"
-            value={name}
-            onChange={e => setName(e.target.value)}
-            required
-          />
-          <input
-            className="block w-full mb-4 p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-            type="password"
-            placeholder="密碼"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            required
-          />
-          <button
-            className="w-full bg-blue-600 text-white py-3 rounded font-semibold hover:bg-blue-700 transition"
-            type="submit"
-          >
-            登入
-          </button>
-          <div className="mt-4 text-center text-red-500">{msg}</div>
-          <div className="mt-4 text-center">
-            <span className="text-gray-600">沒有帳號？</span>
-            <a href="/register" className="text-blue-600 hover:underline ml-1">註冊</a>
-          </div>
-        </form>
+    <>
+      <Head>
+        <title>多人分賬系統 - 智慧分帳、群組花費管理登入</title>
+        <meta
+          name="description"
+          content="登入多人分賬系統，輕鬆管理群組花費、AA制分帳、記錄每個人的支出與剩餘金額。最適合朋友聚會、家庭、同事共同記帳的免費工具！"
+        />
+        <meta name="keywords" content="分帳,多人分帳,AA制,群組記帳,花費管理,共用帳本" />
+      </Head>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-100 to-blue-300">
+        <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8">
+          <h1 className="text-3xl font-bold text-center text-blue-700 mb-2">多人分賬系統</h1>
+          <h2 className="text-xl font-semibold text-center mb-6">登入</h2>
+          <form onSubmit={handleSubmit}>
+            <input
+              className="block w-full mb-4 p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+              placeholder="名字或 Email"
+              value={name}
+              onChange={e => setName(e.target.value)}
+              required
+            />
+            <input
+              className="block w-full mb-4 p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+              type="password"
+              placeholder="密碼"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              required
+            />
+            <button
+              className="w-full bg-blue-600 text-white py-3 rounded font-semibold hover:bg-blue-700 transition"
+              type="submit"
+            >
+              登入
+            </button>
+            <div className="mt-4 text-center text-red-500">{msg}</div>
+            <div className="mt-4 text-center">
+              <span className="text-gray-600">沒有帳號？</span>
+              <a href="/register" className="text-blue-600 hover:underline ml-1">註冊</a>
+            </div>
+          </form>
+        </div>
+        <div className="mt-8 text-center text-gray-600 text-sm">
+          <div>問題聯絡人：呂秉杰</div>
+          <div>分機：253649</div>
+          <div>信箱：Bjie5683@gmail.com</div>
+        </div>
       </div>
-      <div className="mt-8 text-center text-gray-600 text-sm">
-        <div>問題聯絡人：呂秉杰</div>
-        <div>分機：253649</div>
-        <div>信箱：Bjie5683@gmail.com</div>
-      </div>
-    </div>
+    </>
   );
 }
