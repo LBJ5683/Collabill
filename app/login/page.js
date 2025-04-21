@@ -36,7 +36,7 @@ export default function Login() {
           <form onSubmit={handleSubmit}>
             <input
               className="block w-full mb-4 p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-              placeholder="名字或 Email"
+              placeholder="名字"
               value={name}
               onChange={e => setName(e.target.value)}
               required
