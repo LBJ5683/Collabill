@@ -22,16 +22,16 @@ export default function Login() {
   return (
     <>
       <Head>
-        <title>多人分賬系統 - 智慧分帳、群組花費管理登入</title>
+        <title>多人分帳系統 - 智慧分帳、群組花費管理登入</title>
         <meta
           name="description"
-          content="登入多人分賬系統，輕鬆管理群組花費、AA制分帳、記錄每個人的支出與剩餘金額。最適合朋友聚會、家庭、同事共同記帳的免費工具！"
+          content="登入多人分帳系統，輕鬆管理群組花費、AA制分帳、記錄每個人的支出與剩餘金額。最適合朋友聚會、家庭、同事共同記帳的免費工具！"
         />
         <meta name="keywords" content="分帳,多人分帳,AA制,群組記帳,花費管理,共用帳本" />
       </Head>
       <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-100 to-blue-300">
         <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8">
-          <h1 className="text-3xl font-bold text-center text-blue-700 mb-2">多人分賬系統</h1>
+          <h1 className="text-3xl font-bold text-center text-blue-700 mb-2">多人分帳系統</h1>
           <h2 className="text-xl font-semibold text-center mb-6">登入</h2>
           <form onSubmit={handleSubmit}>
             <input

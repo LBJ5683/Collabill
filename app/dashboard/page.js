@@ -546,7 +546,7 @@ export default function Dashboard() {
             </div>
           )}
           <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold text-blue-800 tracking-wide">分賬表格</h1>
+            <h1 className="text-3xl font-bold text-blue-800 tracking-wide">分帳表格</h1>
             <div className="flex gap-3">
               <button className="bg-white border border-blue-400 text-blue-700 px-4 py-2 rounded-lg shadow hover:bg-blue-50 transition font-semibold" onClick={() => router.push('/')}>返回首頁</button>
               <button
@@ -605,7 +605,7 @@ export default function Dashboard() {
                   </tr>
                 ) : bills.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="text-center py-8">目前沒有分賬資料</td>
+                    <td colSpan={8} className="text-center py-8">目前沒有分帳資料</td>
                   </tr>
                 ) : (
                   bills.map((bill, idx) => (
