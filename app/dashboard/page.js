@@ -304,6 +304,14 @@ export default function Dashboard() {
       {/* 右側主區 */}
       <main className="flex-1 p-10">
         <div className="flex-1 flex flex-col">
+          {/* 今日花費統計 */}
+          <div className="mb-4 flex flex-wrap gap-6 items-center">
+            <div className="text-lg font-bold text-blue-700">今日花費：</div>
+            <div className="text-base text-blue-900">🍚 食物：{bills.reduce((sum, b) => sum + (b.food || 0), 0)}</div>
+            <div className="text-base text-blue-900">🥤 飲料：{bills.reduce((sum, b) => sum + (b.drink || 0), 0)}</div>
+            <div className="text-base text-blue-900">🛒 其他：{bills.reduce((sum, b) => sum + (b.other || 0), 0)}</div>
+            <div className="text-base text-blue-900 font-bold ml-4">剩餘金額總額：{bills.reduce((sum, b) => sum + ((b.amount_in || 0) - (b.food || 0) - (b.drink || 0) - (b.other || 0)), 0)}</div>
+          </div>
           {/* 使用指南彈窗 */}
           {showGuide && (
             <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
@@ -424,6 +432,7 @@ export default function Dashboard() {
                     <table className="min-w-full text-center">
                       <thead className="bg-blue-50 text-blue-700">
                         <tr>
+                          <th className="px-2 py-3">序</th>
                           <th className="px-4 py-3">姓名</th>
                           <th className="px-4 py-3">投入金額</th>
                           <th className="px-4 py-3">食物花費</th>
@@ -432,26 +441,14 @@ export default function Dashboard() {
                         </tr>
                       </thead>
                       <tbody>
-                        {historyBills.map(bill => (
+                        {historyBills.map((bill, idx) => (
                           <tr key={bill.id}>
+                            <td className="px-2 py-2">{idx + 1}</td>
                             <td className="px-4 py-2">{bill.name}</td>
-                            {FIELDS.map(f => (
-                              <td key={f.key} className="px-4 py-2">
-                                <input
-                                  type="number"
-                                  className="w-20 p-1 border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-                                  value={
-                                    historyEdit[bill.id]?.[f.key] !== undefined
-                                      ? historyEdit[bill.id][f.key]
-                                      : bill[f.key] || ''
-                                  }
-                                  onChange={e =>
-                                    handleHistoryEdit(bill.id, f.key, e.target.value)
-                                  }
-                                  disabled={historyViewMode !== 'edit'}
-                                />
-                              </td>
-                            ))}
+                            <td className="px-4 py-2">{bill.amount_in || 0}</td>
+                            <td className="px-4 py-2">{bill.food || 0}</td>
+                            <td className="px-4 py-2">{bill.drink || 0}</td>
+                            <td className="px-4 py-2">{bill.other || 0}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -529,6 +526,7 @@ export default function Dashboard() {
             <table className="min-w-full text-center">
               <thead className="bg-blue-100 text-blue-700">
                 <tr>
+                  <th className="px-2 py-3">序</th>
                   <th className="px-4 py-3">姓名</th>
                   <th className="px-4 py-3">投入金額</th>
                   <th className="px-4 py-3">食物花費</th>
@@ -541,15 +539,16 @@ export default function Dashboard() {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={7} className="text-center py-8">載入中...</td>
+                    <td colSpan={8} className="text-center py-8">載入中...</td>
                   </tr>
                 ) : bills.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="text-center py-8">目前沒有分賬資料</td>
+                    <td colSpan={8} className="text-center py-8">目前沒有分賬資料</td>
                   </tr>
                 ) : (
-                  bills.map(bill => (
+                  bills.map((bill, idx) => (
                     <tr key={bill.id} className="hover:bg-blue-50 transition">
+                      <td className="px-2 py-2">{idx + 1}</td>
                       <td className="px-4 py-2">{bill.name}</td>
                       <td className="px-4 py-2">{bill.amount_in || 0}</td>
                       <td className="px-4 py-2">{bill.food || 0}</td>
