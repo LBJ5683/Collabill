@@ -163,10 +163,10 @@ export default function Dashboard() {
           // 有資料就 update，保留其他欄位
           const old = exist[0];
           const updateObj = {
-            amount_in: modalField === 'amount_in' ? Number(value) : old.amount_in || 0,
-            food: modalField === 'food' ? Number(value) : old.food || 0,
-            drink: modalField === 'drink' ? Number(value) : old.drink || 0,
-            other: modalField === 'other' ? Number(value) : old.other || 0,
+            amount_in: modalField === 'amount_in' ? (old.amount_in || 0) + Number(value) : old.amount_in || 0,
+            food: modalField === 'food' ? (old.food || 0) + Number(value) : old.food || 0,
+            drink: modalField === 'drink' ? (old.drink || 0) + Number(value) : old.drink || 0,
+            other: modalField === 'other' ? (old.other || 0) + Number(value) : old.other || 0,
           };
           await supabase.from('bills').update(updateObj).eq('id', old.id);
         } else {
@@ -235,7 +235,21 @@ export default function Dashboard() {
     }
     // 查詢只屬於這個 user 的資料
     const { data } = await supabase.from('bills').select('*').eq('date', date).eq('user_id', user.id).order('created_at', { ascending: true });
-    setHistoryBills(data || []);
+    // sum 同一個人同一天的所有資料
+    const sumMap = {};
+    (data || []).forEach(bill => {
+      const key = bill.name ? bill.name.trim() : '';
+      if (!key) return;
+      if (!sumMap[key]) {
+        sumMap[key] = { ...bill, name: key };
+      } else {
+        sumMap[key].amount_in += bill.amount_in || 0;
+        sumMap[key].food += bill.food || 0;
+        sumMap[key].drink += bill.drink || 0;
+        sumMap[key].other += bill.other || 0;
+      }
+    });
+    setHistoryBills(Object.values(sumMap));
     setHistoryEdit({});
   }
   async function saveHistoryEdit() {
@@ -312,10 +326,11 @@ export default function Dashboard() {
               <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-lg border border-blue-200">
                 <h2 className="text-lg font-bold mb-4 text-blue-700">使用指南</h2>
                 <ul className="list-disc pl-6 text-blue-900 space-y-2 mb-4 text-base">
-                  <li>先「新增參與者」，建立分帳名單</li>
-                  <li>左側區域可批次輸入投入金額與各類花費</li>
-                  <li>右側區域可刪除指定參與者</li>
-                  <li>歷史記錄可查詢特定日期的資料，並進行編輯與更正</li>
+                  <li>先「新增參與者」</li>
+                  <li>每位參與者先輸入「投入金額」</li>
+                  <li>每日可批次輸入「食物／飲料／其他花費」</li>
+                  <li>左上顯示：「今日總花費」、「剩餘總金額」</li>
+                  <li>「歷史記錄」可查詢指定日期，並可編輯與更正</li>
                 </ul>
                 <div className="flex justify-end">
                   <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" onClick={() => setShowGuide(false)}>關閉</button>
@@ -334,12 +349,13 @@ export default function Dashboard() {
                       <div key={bill.id} className="flex items-center gap-2">
                         <span className="w-24 text-blue-900">{bill.name}</span>
                         <input
-                          type="number"
+                          type="text"
+                          inputMode="numeric"
+                          pattern="[0-9]*"
                           className="flex-1 p-2 border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
                           placeholder="金額"
-                          value={modalValues[bill.id] !== undefined ? modalValues[bill.id] : bill[modalField] || ''}
-                          onChange={e => setModalValues(a => ({ ...a, [bill.id]: e.target.value }))}
-                          min={0}
+                          value={modalValues[bill.id] || ''}
+                          onChange={e => setModalValues(a => ({ ...a, [bill.id]: e.target.value.replace(/[^0-9]/g, '') }))}
                         />
                       </div>
                     ))}
@@ -441,7 +457,9 @@ export default function Dashboard() {
                             <td className="px-4 py-2">{bill.name}</td>
                             <td className="px-4 py-2">
                               <input
-                                type="number"
+                                type="text"
+                                inputMode="numeric"
+                                pattern="[0-9]*"
                                 className="w-20 p-1 border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
                                 value={
                                   historyEdit[bill.id]?.amount_in !== undefined
@@ -459,7 +477,9 @@ export default function Dashboard() {
                             </td>
                             <td className="px-4 py-2">
                               <input
-                                type="number"
+                                type="text"
+                                inputMode="numeric"
+                                pattern="[0-9]*"
                                 className="w-20 p-1 border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
                                 value={
                                   historyEdit[bill.id]?.food !== undefined
@@ -477,7 +497,9 @@ export default function Dashboard() {
                             </td>
                             <td className="px-4 py-2">
                               <input
-                                type="number"
+                                type="text"
+                                inputMode="numeric"
+                                pattern="[0-9]*"
                                 className="w-20 p-1 border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
                                 value={
                                   historyEdit[bill.id]?.drink !== undefined
@@ -495,7 +517,9 @@ export default function Dashboard() {
                             </td>
                             <td className="px-4 py-2">
                               <input
-                                type="number"
+                                type="text"
+                                inputMode="numeric"
+                                pattern="[0-9]*"
                                 className="w-20 p-1 border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
                                 value={
                                   historyEdit[bill.id]?.other !== undefined
