@@ -65,6 +65,14 @@ export default function Dashboard() {
     return new Date().toISOString().slice(0, 10);
   }
 
+  // 取得今日 bills
+  const today = getToday();
+  const todayBills = bills.filter(b => b.date === today);
+  const todayFood = todayBills.reduce((sum, b) => sum + (b.food || 0), 0);
+  const todayDrink = todayBills.reduce((sum, b) => sum + (b.drink || 0), 0);
+  const todayOther = todayBills.reduce((sum, b) => sum + (b.other || 0), 0);
+  const todayRemain = todayBills.reduce((sum, b) => sum + ((b.amount_in || 0) - (b.food || 0) - (b.drink || 0) - (b.other || 0)), 0);
+
   async function fetchBills() {
     setLoading(true);
     // 取得目前登入的 user
@@ -315,10 +323,10 @@ export default function Dashboard() {
           {/* 今日花費統計 */}
           <div className="mb-4 flex flex-wrap gap-6 items-center">
             <div className="text-lg font-bold text-blue-700">今日花費：</div>
-            <div className="text-base text-blue-900">🍚 食物：{bills.reduce((sum, b) => sum + (b.food || 0), 0)}</div>
-            <div className="text-base text-blue-900">🥤 飲料：{bills.reduce((sum, b) => sum + (b.drink || 0), 0)}</div>
-            <div className="text-base text-blue-900">🛒 其他：{bills.reduce((sum, b) => sum + (b.other || 0), 0)}</div>
-            <div className="text-base text-blue-900 font-bold ml-4">剩餘金額總額：{bills.reduce((sum, b) => sum + ((b.amount_in || 0) - (b.food || 0) - (b.drink || 0) - (b.other || 0)), 0)}</div>
+            <div className="text-base text-blue-900">🍚 食物：{todayFood}</div>
+            <div className="text-base text-blue-900">🥤 飲料：{todayDrink}</div>
+            <div className="text-base text-blue-900">🛒 其他：{todayOther}</div>
+            <div className="text-base text-blue-900 font-bold ml-4">剩餘金額總額：{todayRemain}</div>
           </div>
           {/* 使用指南彈窗 */}
           {showGuide && (
@@ -539,6 +547,15 @@ export default function Dashboard() {
                         ))}
                       </tbody>
                     </table>
+                  </div>
+                )}
+                {/* 歷史記錄分別總額 */}
+                {historyQueried && (
+                  <div className="mb-4 flex flex-wrap gap-6 items-center text-base text-blue-900">
+                    <div>💰 投入金額總額：{historyBills.reduce((sum, b) => sum + (b.amount_in || 0), 0)}</div>
+                    <div>🍚 食物花費總額：{historyBills.reduce((sum, b) => sum + (b.food || 0), 0)}</div>
+                    <div>🥤 飲料花費總額：{historyBills.reduce((sum, b) => sum + (b.drink || 0), 0)}</div>
+                    <div>🛒 其他花費總額：{historyBills.reduce((sum, b) => sum + (b.other || 0), 0)}</div>
                   </div>
                 )}
                 {historyMsg && <div className="text-red-500 mb-2">{historyMsg}</div>}
