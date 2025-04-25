@@ -51,6 +51,9 @@ export default function Dashboard() {
   const [historyViewMode, setHistoryViewMode] = useState('view'); // 'view' | 'edit'
   const [historyQueried, setHistoryQueried] = useState(false);
 
+  // 新增今日加總 state
+  const [todayTotals, setTodayTotals] = useState({ amount_in: 0, food: 0, drink: 0, other: 0 });
+
   const router = useRouter();
 
   // 使用指南彈窗
@@ -58,6 +61,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchBills();
+    fetchTodayTotals();
   }, []);
 
   // 取得今天日期
@@ -65,12 +69,22 @@ export default function Dashboard() {
     return new Date().toISOString().slice(0, 10);
   }
 
-  // 取得今日 bills
-  const today = getToday();
-  const todayBills = bills.filter(b => b.date === today);
-  const todayFood = todayBills.reduce((sum, b) => sum + (b.food || 0), 0);
-  const todayDrink = todayBills.reduce((sum, b) => sum + (b.drink || 0), 0);
-  const todayOther = todayBills.reduce((sum, b) => sum + (b.other || 0), 0);
+  // 取得今日加總（和歷史記錄一致）
+  async function fetchTodayTotals() {
+    const today = getToday();
+    // 查詢所有人今天的資料（不過濾 user_id）
+    const { data } = await supabase.from('bills').select('*').eq('date', today);
+    // sum 同一個人同一天的所有資料
+    const sum = { amount_in: 0, food: 0, drink: 0, other: 0 };
+    (data || []).forEach(bill => {
+      sum.amount_in += bill.amount_in || 0;
+      sum.food += bill.food || 0;
+      sum.drink += bill.drink || 0;
+      sum.other += bill.other || 0;
+    });
+    setTodayTotals(sum);
+  }
+
   // 剩餘金額總額（全部資料）
   const totalRemain = bills.reduce((sum, b) => sum + ((b.amount_in || 0) - (b.food || 0) - (b.drink || 0) - (b.other || 0)), 0);
 
@@ -141,6 +155,7 @@ export default function Dashboard() {
       setNewName('');
       setShowAdd(false);
       fetchBills();
+      fetchTodayTotals();
     }
   }
 
@@ -198,6 +213,7 @@ export default function Dashboard() {
     setShowModal(false);
     setModalValues({});
     fetchBills();
+    fetchTodayTotals();
   }
 
   // 刪除參與者
@@ -225,6 +241,7 @@ export default function Dashboard() {
     setDeleteName('');
     setDeleteMsg('');
     fetchBills();
+    fetchTodayTotals();
   }
 
   // 歷史記錄
@@ -274,6 +291,7 @@ export default function Dashboard() {
     setShowHistory(false);
     setHistoryEdit({});
     fetchBills();
+    fetchTodayTotals();
   }
 
   return (
@@ -324,9 +342,9 @@ export default function Dashboard() {
           {/* 今日花費統計 */}
           <div className="mb-4 flex flex-wrap gap-6 items-center">
             <div className="text-lg font-bold text-blue-700">今日花費：</div>
-            <div className="text-base text-blue-900">🍚 食物：{todayFood}</div>
-            <div className="text-base text-blue-900">🥤 飲料：{todayDrink}</div>
-            <div className="text-base text-blue-900">🛒 其他：{todayOther}</div>
+            <div className="text-base text-blue-900">🍚 食物：{todayTotals.food}</div>
+            <div className="text-base text-blue-900">🥤 飲料：{todayTotals.drink}</div>
+            <div className="text-base text-blue-900">🛒 其他：{todayTotals.other}</div>
             <div className="text-base text-blue-900 font-bold ml-4">剩餘金額總額：{totalRemain}</div>
           </div>
           {/* 使用指南彈窗 */}
