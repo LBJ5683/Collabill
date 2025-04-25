@@ -71,7 +71,8 @@ export default function Dashboard() {
   const todayFood = todayBills.reduce((sum, b) => sum + (b.food || 0), 0);
   const todayDrink = todayBills.reduce((sum, b) => sum + (b.drink || 0), 0);
   const todayOther = todayBills.reduce((sum, b) => sum + (b.other || 0), 0);
-  const todayRemain = todayBills.reduce((sum, b) => sum + ((b.amount_in || 0) - (b.food || 0) - (b.drink || 0) - (b.other || 0)), 0);
+  // 剩餘金額總額（全部資料）
+  const totalRemain = bills.reduce((sum, b) => sum + ((b.amount_in || 0) - (b.food || 0) - (b.drink || 0) - (b.other || 0)), 0);
 
   async function fetchBills() {
     setLoading(true);
@@ -326,7 +327,7 @@ export default function Dashboard() {
             <div className="text-base text-blue-900">🍚 食物：{todayFood}</div>
             <div className="text-base text-blue-900">🥤 飲料：{todayDrink}</div>
             <div className="text-base text-blue-900">🛒 其他：{todayOther}</div>
-            <div className="text-base text-blue-900 font-bold ml-4">剩餘金額總額：{todayRemain}</div>
+            <div className="text-base text-blue-900 font-bold ml-4">剩餘金額總額：{totalRemain}</div>
           </div>
           {/* 使用指南彈窗 */}
           {showGuide && (
