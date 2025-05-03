@@ -1,4 +1,5 @@
 export default function PrivacyPage() {
+
     return (
       <div className="min-h-screen flex items-center justify-center px-4">
         <div className="max-w-2xl w-full bg-white p-8 rounded shadow">

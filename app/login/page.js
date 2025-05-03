@@ -1,4 +1,5 @@
 'use client';
+
 import { useState } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import { useRouter } from 'next/navigation';
@@ -33,10 +34,7 @@ export default function Login() {
         <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8">
           <h1 className="text-3xl font-bold text-center text-blue-700 mb-2">CollaBill｜集資分帳系統</h1>
           <h2 className="text-xl font-semibold text-center mb-6">登入</h2>
-          <p className="text-gray-700 text-center text-sm mb-4 px-2">
-             CollaBill 是一款免費多人分帳工具，支援長期集資與消費，
-             團體金錢管理更簡單。註冊一次，輕鬆追蹤所有花費。
-          </p>
+          
           <form onSubmit={handleSubmit}>
             <input
               className="block w-full mb-4 p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -67,13 +65,7 @@ export default function Login() {
           </form>
         </div>
         <div className="mt-8 text-center text-gray-500 text-sm leading-relaxed">
-  如有問題請聯絡：
-  <a
-    href="mailto:jie5683@gmail.com"
-    className="underline hover:text-blue-600"
-  >
-    Bjie5683@gmail.com
-  </a>
+        <a href="/feedback" className="hover:underline">📩 聯絡我們</a>
   <br />
           <a
     href="/privacy"

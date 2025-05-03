@@ -738,10 +738,21 @@ if (!sumMap.has(key)) {
             </table>
           </div>
         </div>
-        <div className="mt-10 text-center text-sm text-gray-500">
-          問題聯絡人：呂秉杰<br />
-          分機：253649<br />
-          信箱：Bjie5683@gmail.com
+        <div className="mt-8 text-center text-gray-500 text-sm leading-relaxed">
+  如有問題請聯絡：
+  <a
+    href="mailto:jie5683@gmail.com"
+    className="underline hover:text-blue-600"
+  >
+    Bjie5683@gmail.com
+  </a>
+  <br />
+          <a
+    href="/privacy"
+    className="underline hover:text-blue-600 mt-1 inline-block"
+  >
+    隱私政策
+  </a>
         </div>
       </main>
     </div>
