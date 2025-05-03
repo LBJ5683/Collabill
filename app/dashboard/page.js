@@ -739,13 +739,7 @@ if (!sumMap.has(key)) {
           </div>
         </div>
         <div className="mt-8 text-center text-gray-500 text-sm leading-relaxed">
-  如有問題請聯絡：
-  <a
-    href="mailto:jie5683@gmail.com"
-    className="underline hover:text-blue-600"
-  >
-    Bjie5683@gmail.com
-  </a>
+        <a href="/feedback" className="hover:underline">📩 聯絡我們</a>
   <br />
           <a
     href="/privacy"
