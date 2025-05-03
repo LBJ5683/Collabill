@@ -1,4 +1,16 @@
 'use client';
+
+import { ReactSortable } from 'react-sortablejs';
+
+// 排序後重新排列陣列的工具函數
+function arrayMove(arr, fromIndex, toIndex) {
+  const newArr = [...arr];
+  const [moved] = newArr.splice(fromIndex, 1);
+  newArr.splice(toIndex, 0, moved);
+  return newArr;
+}
+
+
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import { useRouter } from 'next/navigation';
@@ -99,23 +111,25 @@ export default function Dashboard() {
       return;
     }
     // 查詢只屬於這個 user 的資料
-    const { data } = await supabase.from('bills').select('*').eq('user_id', user.id).order('created_at', { ascending: true });
+    const { data } = await supabase.from('bills').select('*').eq('user_id', user.id).order('order', { ascending: true });
     if (data) {
       // 以 name.trim() 分組加總，只顯示 name 不為空的資料
-      const sumMap = {};
+      const sumMap = new Map();
       (data || []).forEach(bill => {
         const key = bill.name ? bill.name.trim() : '';
-        if (!key) return; // 跳過 name 為空
-        if (!sumMap[key]) {
-          sumMap[key] = { ...bill, name: key };
+        if (!key) return;
+        if (!sumMap.has(key)) {
+          sumMap.set(key, { ...bill, name: key });
         } else {
-          sumMap[key].amount_in += bill.amount_in || 0;
-          sumMap[key].food += bill.food || 0;
-          sumMap[key].drink += bill.drink || 0;
-          sumMap[key].other += bill.other || 0;
+          const item = sumMap.get(key);
+          item.amount_in += bill.amount_in || 0;
+          item.food += bill.food || 0;
+          item.drink += bill.drink || 0;
+          item.other += bill.other || 0;
         }
       });
-      setBills(Object.values(sumMap));
+      setBills(Array.from(sumMap.values()));
+      
     } else {
       setBills([]);
     }
@@ -146,7 +160,7 @@ export default function Dashboard() {
     }
     // 新增時要帶上 user_id
     const { error } = await supabase.from('bills').insert([
-      { name: newName.trim(), amount_in: 0, food: 0, drink: 0, other: 0, date: today, user_id: user.id }
+      { name: newName.trim(), amount_in: 0, food: 0, drink: 0, other: 0, date: today, user_id: user.id, order: bills.length  }
     ]);
     if (error) {
       setAddMsg('新增失敗，請重試');
@@ -260,22 +274,33 @@ export default function Dashboard() {
       return;
     }
     // 查詢只屬於這個 user 的資料
-    const { data } = await supabase.from('bills').select('*').eq('date', date).eq('user_id', user.id).order('created_at', { ascending: true });
+    const { data } = await supabase.from('bills').select('*').eq('date', date).eq('user_id', user.id).order('order', { ascending: true });
+
     // sum 同一個人同一天的所有資料
-    const sumMap = {};
+    const sumMap = new Map();
     (data || []).forEach(bill => {
       const key = bill.name ? bill.name.trim() : '';
       if (!key) return;
-      if (!sumMap[key]) {
-        sumMap[key] = { ...bill, name: key };
-      } else {
-        sumMap[key].amount_in += bill.amount_in || 0;
-        sumMap[key].food += bill.food || 0;
-        sumMap[key].drink += bill.drink || 0;
-        sumMap[key].other += bill.other || 0;
+      const total =
+  (bill.amount_in || 0) +
+  (bill.food || 0) +
+  (bill.drink || 0) +
+  (bill.other || 0);
+
+if (total === 0) return;
+
+if (!sumMap.has(key)) {
+  sumMap.set(key, { ...bill, name: key, id: bill.id });
+}
+ else {
+        const item = sumMap.get(key);
+        item.amount_in += bill.amount_in || 0;
+        item.food += bill.food || 0;
+        item.drink += bill.drink || 0;
+        item.other += bill.other || 0;
       }
     });
-    setHistoryBills(Object.values(sumMap));
+    setHistoryBills(Array.from(sumMap.values()));
     setHistoryEdit({});
   }
   async function saveHistoryEdit() {
@@ -358,6 +383,7 @@ export default function Dashboard() {
                   <li>每日可批次輸入「食物／飲料／其他花費」</li>
                   <li>左上顯示：「今日總花費」、「剩餘總金額」</li>
                   <li>「歷史記錄」可查詢指定日期，並可編輯與更正</li>
+                  <li>拖住名字可調整順序</li>
                 </ul>
                 <div className="flex justify-end">
                   <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" onClick={() => setShowGuide(false)}>關閉</button>
@@ -477,11 +503,14 @@ export default function Dashboard() {
                           <th className="px-4 py-3">其他花費</th>
                         </tr>
                       </thead>
-                      <tbody>
-                        {historyBills.map((bill, idx) => (
+
+           <tbody>
+
+{historyBills.length > 0 && historyBills.map((bill, idx) => (
+
                           <tr key={bill.id}>
                             <td className="px-2 py-2">{idx + 1}</td>
-                            <td className="px-4 py-2">{bill.name}</td>
+                            <td className="px-4 py-2 drag-handle cursor-move">{bill.name}</td>
                             <td className="px-4 py-2">
                               <input
                                 type="text"
@@ -658,40 +687,54 @@ export default function Dashboard() {
                   <th className="px-4 py-3">操作</th>
                 </tr>
               </thead>
-              <tbody>
-                {loading ? (
-                  <tr>
-                    <td colSpan={8} className="text-center py-8">載入中...</td>
-                  </tr>
-                ) : bills.length === 0 ? (
-                  <tr>
-                    <td colSpan={8} className="text-center py-8">目前沒有分帳資料</td>
-                  </tr>
-                ) : (
-                  bills.map((bill, idx) => (
-                    <tr key={bill.id} className="hover:bg-blue-50 transition">
-                      <td className="px-2 py-2">{idx + 1}</td>
-                      <td className="px-4 py-2">{bill.name}</td>
-                      <td className="px-4 py-2">{bill.amount_in || 0}</td>
-                      <td className="px-4 py-2">{bill.food || 0}</td>
-                      <td className="px-4 py-2">{bill.drink || 0}</td>
-                      <td className="px-4 py-2">{bill.other || 0}</td>
-                      <td className={`px-4 py-2 font-bold ${calcRemain(bill) < 0 ? 'text-red-600' : 'text-blue-700'}`}>
-                        {calcRemain(bill)}
-                      </td>
-                      <td className="px-4 py-2">
-                        <button
-                          className="text-red-500 hover:text-red-700 font-semibold"
-                          onClick={() => openDeleteDialog(bill)}
-                          type="button"
-                        >
-                          刪除
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
+
+              <ReactSortable
+  tag="tbody"
+  list={bills}
+  setList={setBills}
+  handle=".drag-handle"
+  animation={150}
+  onEnd={async ({ oldIndex, newIndex }) => {
+    const updated = arrayMove(bills, oldIndex, newIndex);
+    setBills(updated);
+  
+    const { data: userData } = await supabase.auth.getUser();
+    const user = userData?.user;
+    if (!user) return;
+  
+    for (let i = 0; i < updated.length; i++) {
+      await supabase
+        .from('bills')
+        .update({ order: i })
+        .eq('user_id', user.id)
+        .eq('name', updated[i].name);
+    }
+  }}
+>
+  {bills.map((bill, idx) => (
+    <tr key={bill.id} className="hover:bg-blue-50 transition">
+      <td className="px-2 py-2">{idx + 1}</td>
+      <td className="px-4 py-2 drag-handle cursor-move">{bill.name}</td>
+      <td className="px-4 py-2">{bill.amount_in || 0}</td>
+      <td className="px-4 py-2">{bill.food || 0}</td>
+      <td className="px-4 py-2">{bill.drink || 0}</td>
+      <td className="px-4 py-2">{bill.other || 0}</td>
+      <td className="px-4 py-2 font-bold">
+        {calcRemain(bill) < 0 ? <span className="text-red-600">{calcRemain(bill)}</span> : calcRemain(bill)}
+      </td>
+      <td className="px-4 py-2">
+        <button
+          className="text-red-500 hover:text-red-700 font-semibold"
+          onClick={() => openDeleteDialog(bill)}
+          type="button"
+        >
+          刪除
+        </button>
+      </td>
+    </tr>
+  ))}
+</ReactSortable>
+
             </table>
           </div>
         </div>
