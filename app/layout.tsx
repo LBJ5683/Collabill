@@ -14,8 +14,24 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Collabill｜先集資、再分帳，個人帳戶清楚不混亂",
-  description: "適用於長期團體支出，如訂餐、共住、社團或專案分帳。先集資集中扣款，每人獨立帳戶明細透明，省去墊付、對帳與找零困擾。",
+  title: "Collabill｜集資分帳系統｜免下載、免安裝、線上使用",
+  description:
+    "先集資、再分帳，個人帳戶清楚不混亂。適用於長期團體支出，如訂餐、共住、社團或專案分帳。先集資集中扣款，每人獨立帳戶明細透明，省去墊付、對帳與找零困擾。",
+  openGraph: {
+    title: "Collabill｜集資分帳系統｜免下載、免安裝、線上使用",
+    description:
+      "先集資、再分帳，個人帳戶清楚不混亂。適用於長期團體支出，如訂餐、共住、社團或專案分帳。先集資集中扣款，每人獨立帳戶明細透明，省去墊付、對帳與找零困擾。",
+    images: [
+      {
+        url: "/preview-main.png",
+        width: 1200,
+        height: 630,
+        alt: "CollaBill 預覽圖",
+      },
+    ],
+    type: "website",
+    url: "https://collabill01.vercel.app/",
+  },
 };
 
 export default function RootLayout({
@@ -24,8 +40,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="zh-Hant">
       <head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+        <meta property="og:title" content="Collabill｜集資分帳系統｜免下載、免安裝、線上使用" />
+        <meta property="og:description" content="先集資、再分帳，個人帳戶清楚不混亂。適用於長期團體支出，如訂餐、共住、社團或專案分帳。先集資集中扣款，每人獨立帳戶明細透明，省去墊付、對帳與找零困擾。" />
+        <meta property="og:image" content="/preview-social.png" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://collabill01.vercel.app/" />
+
+        <link rel="icon" href="/favicon.ico" />
+
         <Script async src="https://www.googletagmanager.com/gtag/js?id=G-WX0TM1TPPY" strategy="afterInteractive" />
         <Script id="ga4-init" strategy="afterInteractive">
           {`
@@ -36,9 +63,7 @@ export default function RootLayout({
           `}
         </Script>
       </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         {children}
       </body>
     </html>
