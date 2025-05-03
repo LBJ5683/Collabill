@@ -34,7 +34,7 @@ const HISTORY_ICON = '📜';
 
 export default function Dashboard() {
   const [bills, setBills] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
   const [newName, setNewName] = useState('');
   const [addMsg, setAddMsg] = useState('');
