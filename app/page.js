@@ -1,10 +1,19 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import Script from 'next/script';
 
 export default function HomePage() {
   const [modalImage, setModalImage] = useState(null);
-  
+
+  useEffect(() => {
+    try {
+      (window.adsbygoogle = window.adsbygoogle || []).push({});
+    } catch (e) {
+      console.error('Adsense error:', e);
+    }
+  }, []);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-100 to-blue-300 flex flex-col items-center justify-center px-4 py-10">
       <div className="max-w-xl w-full bg-white rounded-xl shadow-lg p-8 text-center">
@@ -34,27 +43,35 @@ export default function HomePage() {
 
       {/* 功能圖片說明區塊 */}
       <div className="w-full bg-gray-50 py-12 mt-10">
-  <div className="max-w-3xl mx-auto px-4 text-center">
-    <h2 className="text-xl font-semibold text-gray-800 mb-8">四大特色</h2>
-    <div className="grid grid-cols-2 gap-4 sm:gap-6">
-      {[
-        '免下載',
-        '免安裝',
-        '免費使用',
-        '介面友善'
-      ].map((item, idx) => (
-        <div
-          key={idx}
-          className="bg-white border border-gray-200 rounded-xl px-6 py-5 text-gray-700 font-medium text-lg"
-        >
-          {item}
+        <div className="max-w-3xl mx-auto px-4 text-center">
+          <h2 className="text-xl font-semibold text-gray-800 mb-8">四大特色</h2>
+          <div className="grid grid-cols-2 gap-4 sm:gap-6">
+            {[
+              '免下載',
+              '免安裝',
+              '免費使用',
+              '介面友善'
+            ].map((item, idx) => (
+              <div
+                key={idx}
+                className="bg-white border border-gray-200 rounded-xl px-6 py-5 text-gray-700 font-medium text-lg"
+              >
+                {item}
+              </div>
+            ))}
+          </div>
         </div>
-      ))}
-    </div>
-  </div>
-</div>
+      </div>
 
-
+      {/* Google AdSense 廣告區塊 */}
+      <div className="w-full flex justify-center mt-10">
+        <ins className="adsbygoogle"
+          style={{ display: 'block' }}
+          data-ad-client="ca-pub-7785145306323259"
+          data-ad-slot="8559364872"
+          data-ad-format="auto"
+          data-full-width-responsive="true"></ins>
+      </div>
 
       {/* 圖片放大 modal */}
       {modalImage && (
@@ -69,6 +86,14 @@ export default function HomePage() {
           />
         </div>
       )}
+
+      {/* AdSense script loader */}
+      <Script
+        async
+        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7785145306323259"
+        strategy="afterInteractive"
+        crossOrigin="anonymous"
+      />
     </div>
   );
 }
