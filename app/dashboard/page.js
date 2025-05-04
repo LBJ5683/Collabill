@@ -58,6 +58,14 @@ export default function Dashboard() {
   const [modalMsg, setModalMsg] = useState('');
   const [modalDate, setModalDate] = useState(() => new Date().toISOString().slice(0, 10));
 
+useEffect(() => {
+  try {
+    (window.adsbygoogle = window.adsbygoogle || []).push({});
+  } catch (e) {
+    console.error('Adsense error', e);
+  }
+}, []);
+
   // 刪除確認
   const [deleteId, setDeleteId] = useState(null);
   const [deleteName, setDeleteName] = useState('');
@@ -406,7 +414,7 @@ if (!sumMap.has(key)) {
       animate={{ x: 0, opacity: 1 }}
       exit={{ x: -100, opacity: 0 }}
       transition={{ duration: 0.3 }}
-      className="absolute h-[80vh] w-auto object-contain"
+      className="absolute h-full max-h-[80vh] max-w-full object-contain"
     />
   </AnimatePresence>
 </div>
@@ -789,6 +797,16 @@ if (!sumMap.has(key)) {
             </table>
           </div>
         </div>
+        {/* AdSense 區塊 */}
+<div className="w-full flex justify-center mt-10">
+  <ins className="adsbygoogle"
+    style={{ display: 'block' }}
+    data-ad-client="ca-pub-7785145306323259"
+    data-ad-slot="8559364872"
+    data-ad-format="auto"
+    data-full-width-responsive="true"></ins>
+</div>
+
         <div className="mt-8 text-center text-gray-500 text-sm leading-relaxed">
         <a href="/feedback" className="hover:underline">📩 聯絡我們</a>
   <br />
