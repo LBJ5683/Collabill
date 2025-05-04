@@ -16,14 +16,6 @@ import { supabase } from '../../lib/supabaseClient';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 
-const tutorialImages = [
-  '/guide/page1.png',
-  '/guide/page2.png',
-  '/guide/page3.png',
-  '/guide/page4.png',
-  '/guide/page5.png'
-];
-
 
 const FIELDS = [
   { key: 'amount_in', label: '投入金額' },
