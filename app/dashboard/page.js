@@ -14,6 +14,16 @@ function arrayMove(arr, fromIndex, toIndex) {
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import { useRouter } from 'next/navigation';
+import { AnimatePresence, motion } from 'framer-motion';
+
+const tutorialImages = [
+  '/guide/page1.png',
+  '/guide/page2.png',
+  '/guide/page3.png',
+  '/guide/page4.png',
+  '/guide/page5.png'
+];
+
 
 const FIELDS = [
   { key: 'amount_in', label: '投入金額' },
@@ -38,7 +48,17 @@ export default function Dashboard() {
   const [showAdd, setShowAdd] = useState(false);
   const [newName, setNewName] = useState('');
   const [addMsg, setAddMsg] = useState('');
-
+  const tutorialImages = [
+    '/guide/page1.png',
+    '/guide/page2.png',
+    '/guide/page3.png',
+    '/guide/page4.png',
+    '/guide/page5.png'
+  ];
+  
+  const [showGuide, setShowGuide] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  
   // Modal 狀態
   const [showModal, setShowModal] = useState(false);
   const [modalField, setModalField] = useState('amount_in');
@@ -69,7 +89,7 @@ export default function Dashboard() {
   const router = useRouter();
 
   // 使用指南彈窗
-  const [showGuide, setShowGuide] = useState(false);
+
 
   useEffect(() => {
     fetchBills();
@@ -372,31 +392,70 @@ if (!sumMap.has(key)) {
             <div className="text-base text-blue-900">🛒 其他：{todayTotals.other}</div>
             <div className="text-base text-blue-900 font-bold ml-4">剩餘金額總額：{totalRemain}</div>
           </div>
-          {/* 使用指南彈窗 */}
           {showGuide && (
-            <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-              <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-lg border border-blue-200">
-                <h2 className="text-lg font-bold mb-4 text-blue-700">使用指南</h2>
-                <ul className="list-disc pl-6 text-blue-900 space-y-2 mb-4 text-base">
-                  <li>先「新增參與者」</li>
-                  <li>每位參與者先輸入「投入金額」</li>
-                  <li>每日可批次輸入「食物／飲料／其他花費」</li>
-                  <li>左上顯示：「今日總花費」、「剩餘總金額」</li>
-                  <li>「歷史記錄」可查詢指定日期，並可編輯與更正</li>
-                  <li>拖住名字可調整順序</li>
-                </ul>
-                <div className="flex justify-end">
-                  <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" onClick={() => setShowGuide(false)}>關閉</button>
-                </div>
-              </div>
-            </div>
-          )}
+  <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+    <div className="bg-white rounded-lg p-4 max-w-5xl w-full relative">
+      <button
+        className="absolute top-2 right-2 text-gray-600 text-lg"
+        onClick={() => setShowGuide(false)}
+      >
+        ✕
+      </button>
+
+...
+
+<div className="h-[80vh] w-full relative flex items-center justify-center overflow-hidden">
+  <AnimatePresence mode="wait">
+    <motion.img
+      key={currentImageIndex}
+      src={tutorialImages[currentImageIndex]}
+      alt={`使用指南第 ${currentImageIndex + 1} 張`}
+      initial={{ x: 100, opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      exit={{ x: -100, opacity: 0 }}
+      transition={{ duration: 0.3 }}
+      className="absolute h-[80vh] w-auto object-contain"
+    />
+  </AnimatePresence>
+</div>
+
+
+      <div className="flex justify-between mt-4">
+        <button
+          disabled={currentImageIndex === 0}
+          onClick={() => setCurrentImageIndex(i => i - 1)}
+          className="px-3 py-1 rounded bg-gray-200 disabled:opacity-50"
+        >
+          ← 上一張
+        </button>
+        <button
+          disabled={currentImageIndex === tutorialImages.length - 1}
+          onClick={() => setCurrentImageIndex(i => i + 1)}
+          className="px-3 py-1 rounded bg-blue-500 text-white disabled:opacity-50"
+        >
+          下一張 →
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
           {/* Modal 批次填寫投入/花費 */}
           {showModal && (
             <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
               <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-lg border border-blue-200">
                 <h2 className="text-lg font-bold mb-4 text-blue-700">{FIELDS.find(f => f.key === modalField)?.label || ''}（{modalDate}）</h2>
                 <form onSubmit={handleModalSubmit}>
+                <div className="mb-3">
+  <label className="text-blue-900 font-medium mr-2">選擇日期：</label>
+  <input
+    type="date"
+    className="p-2 border border-blue-300 rounded"
+    value={modalDate}
+    onChange={e => setModalDate(e.target.value)}
+  />
+</div>
+
                   <div className="space-y-3 max-h-72 overflow-y-auto mb-4">
                     {bills.map(bill => (
                       <div key={bill.id} className="flex items-center gap-2">

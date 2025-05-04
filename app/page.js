@@ -4,40 +4,7 @@ import { useState } from 'react';
 
 export default function HomePage() {
   const [modalImage, setModalImage] = useState(null);
-
-  const features = [
-    {
-      img: '/preview-main.png',
-      alt: '主要分帳表格',
-      title: '多人分帳表格',
-      desc: '即時查看每人投入、花費與餘額。',
-    },
-    {
-      img: '/preview-invest.png',
-      alt: '投入金額',
-      title: '參與者先投入金額',
-      desc: '事先集資，避免墊付問題，結帳更省事。',
-    },
-    {
-      img: '/preview-daily.png',
-      alt: '每日消費',
-      title: '填寫每日消費紀錄',
-      desc: '每日輸入花費，自動同步到分帳表格。',
-    },
-    {
-      img: '/preview-history.png',
-      alt: '歷史記錄',
-      title: '查詢與編輯記錄',
-      desc: '可依日期查找記錄，方便修正與追溯。',
-    },
-    {
-      img: '/preview-balance.png',
-      alt: '個人賬戶',
-      title: '個人賬戶餘額',
-      desc: '每人獨立帳戶明細清楚，方便對帳。',
-    },
-  ];
-
+  
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-100 to-blue-300 flex flex-col items-center justify-center px-4 py-10">
       <div className="max-w-xl w-full bg-white rounded-xl shadow-lg p-8 text-center">
@@ -67,31 +34,27 @@ export default function HomePage() {
 
       {/* 功能圖片說明區塊 */}
       <div className="w-full bg-gray-50 py-12 mt-10">
-        <div className="max-w-5xl mx-auto px-4">
-          <h2 className="text-xl font-semibold text-center text-gray-800 mb-10">功能範例畫面</h2>
-          <div className="space-y-10">
-            {features.map((f, i) => (
-              <div
-                key={i}
-                className={`flex flex-col md:flex-row ${i % 2 === 1 ? 'md:flex-row-reverse' : ''} items-center bg-white rounded-xl shadow p-6`}
-              >
-                <div className="md:w-1/2 w-full cursor-pointer group">
-                  <img
-                    src={f.img}
-                    alt={f.alt}
-                    className="rounded-lg transition-transform duration-300 ease-in-out group-hover:scale-105"
-                    onClick={() => setModalImage(f.img)}
-                  />
-                </div>
-                <div className="md:w-1/2 w-full mt-4 md:mt-0 md:px-6 text-left">
-                  <h3 className="text-xl font-bold mb-2">{f.title}</h3>
-                  <p className="text-gray-600 text-sm">{f.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+  <div className="max-w-3xl mx-auto px-4 text-center">
+    <h2 className="text-xl font-semibold text-gray-800 mb-8">四大特色</h2>
+    <div className="grid grid-cols-2 gap-4 sm:gap-6">
+      {[
+        '免下載',
+        '免安裝',
+        '免費使用',
+        '介面友善'
+      ].map((item, idx) => (
+        <div
+          key={idx}
+          className="bg-white border border-gray-200 rounded-xl px-6 py-5 text-gray-700 font-medium text-lg"
+        >
+          {item}
         </div>
-      </div>
+      ))}
+    </div>
+  </div>
+</div>
+
+
 
       {/* 圖片放大 modal */}
       {modalImage && (

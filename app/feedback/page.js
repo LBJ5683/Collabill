@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 export default function FeedbackPage() {
   const [submitted, setSubmitted] = useState(false);
-  const [form, setForm] = useState({ name: '', type: '建議', message: '' });
+  const [form, setForm] = useState({ name: '', email: '', type: '建議', message: '' });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -16,6 +16,7 @@ export default function FeedbackPage() {
         },
         body: JSON.stringify({
           name: form.name,
+          email: form.email,
           type: form.type,
           message: form.message
         })
@@ -46,6 +47,17 @@ export default function FeedbackPage() {
                 className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
+            <div>
+  <label className="block text-sm font-semibold text-gray-700">Email（方便我們回覆您）</label>
+  <input
+    type="email"
+    required
+    value={form.email}
+    onChange={(e) => setForm({ ...form, email: e.target.value })}
+    className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+    placeholder="your@email.com"
+  />
+</div>
 
             <div>
               <label className="block text-sm font-semibold text-gray-700">回饋類型</label>
