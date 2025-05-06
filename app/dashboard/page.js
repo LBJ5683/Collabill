@@ -133,7 +133,7 @@ useEffect(() => {
       return;
     }
     // 查詢只屬於這個 user 的資料
-    const { data } = await supabase.from('bills').select('*').eq('user_id', user.id).order('order', { ascending: true });
+    const { data } = await supabase.from('bills').select('*').eq('user_id', user.id).order('order', { ascending: true, nullsLast: true }).order('id', { ascending: true });;
     if (data) {
       // 以 name.trim() 分組加總，只顯示 name 不為空的資料
       const sumMap = new Map();
@@ -150,7 +150,9 @@ useEffect(() => {
           item.other += bill.other || 0;
         }
       });
-      setBills(Array.from(sumMap.values()));
+      setBills(
+        Array.from(sumMap.values()).sort((a, b) => (a.order ?? 9999) - (b.order ?? 9999))
+      );
       
     } else {
       setBills([]);
@@ -181,9 +183,25 @@ useEffect(() => {
       return;
     }
     // 新增時要帶上 user_id
-    const { error } = await supabase.from('bills').insert([
-      { name: newName.trim(), amount_in: 0, food: 0, drink: 0, other: 0, date: today, user_id: user.id, order: bills.length  }
-    ]);
+// 先計算最大 order，再加一
+const maxOrder = bills.reduce(
+  (max, b) => (b.order !== null && b.order !== undefined ? Math.max(max, b.order) : max),
+  -1
+);
+
+const { error } = await supabase.from('bills').insert([
+  {
+    name: newName.trim(),
+    amount_in: 0,
+    food: 0,
+    drink: 0,
+    other: 0,
+    date: today,
+    user_id: user.id,
+    order: maxOrder + 1   // 👈 加入這行避免順位衝突
+  }
+]);
+
     if (error) {
       setAddMsg('新增失敗，請重試');
     } else {
@@ -220,16 +238,30 @@ useEffect(() => {
         // 查詢該 id、modalDate 是否有資料
         const { data: exist } = await supabase.from('bills').select('*').eq('name', bills.find(b => b.id === id)?.name).eq('date', modalDate).eq('user_id', user.id);
         if (exist && exist.length > 0) {
-          // 有資料就 update，保留其他欄位
           const old = exist[0];
+          const currentOrder =
+            bills.find(b => b.id === id)?.order ?? old.order ?? 9999;
+        
           const updateObj = {
-            amount_in: modalField === 'amount_in' ? (old.amount_in || 0) + Number(value) : old.amount_in || 0,
-            food: modalField === 'food' ? (old.food || 0) + Number(value) : old.food || 0,
-            drink: modalField === 'drink' ? (old.drink || 0) + Number(value) : old.drink || 0,
-            other: modalField === 'other' ? (old.other || 0) + Number(value) : old.other || 0,
+            amount_in: modalField === 'amount_in'
+              ? (old.amount_in || 0) + Number(value)
+              : old.amount_in || 0,
+            food: modalField === 'food'
+              ? (old.food || 0) + Number(value)
+              : old.food || 0,
+            drink: modalField === 'drink'
+              ? (old.drink || 0) + Number(value)
+              : old.drink || 0,
+            other: modalField === 'other'
+              ? (old.other || 0) + Number(value)
+              : old.other || 0,
+            order: currentOrder
           };
+        
           await supabase.from('bills').update(updateObj).eq('id', old.id);
-        } else {
+        }
+        
+        else {
           // 沒資料就 insert，四欄位都齊全
           const bill = bills.find(b => b.id === id);
           await supabase.from('bills').insert([
@@ -240,7 +272,8 @@ useEffect(() => {
               drink: modalField === 'drink' ? Number(value) : 0,
               other: modalField === 'other' ? Number(value) : 0,
               date: modalDate,
-              user_id: user.id
+              user_id: user.id,
+              order: bill ? bill.order : 9999
             }
           ]);
         }
@@ -296,7 +329,7 @@ useEffect(() => {
       return;
     }
     // 查詢只屬於這個 user 的資料
-    const { data } = await supabase.from('bills').select('*').eq('date', date).eq('user_id', user.id).order('order', { ascending: true });
+    const { data } = await supabase.from('bills').select('*').eq('date', date).eq('user_id', user.id).order('order', { ascending: true, nullsLast: true }).order('id', { ascending: true });;
 
     // sum 同一個人同一天的所有資料
     const sumMap = new Map();
@@ -322,10 +355,14 @@ if (!sumMap.has(key)) {
         item.other += bill.other || 0;
       }
     });
-    setHistoryBills(Array.from(sumMap.values()));
+    setHistoryBills(
+      Array.from(sumMap.values()).sort((a, b) => (a.order ?? 9999) - (b.order ?? 9999))
+    );
     setHistoryEdit({});
   }
   async function saveHistoryEdit() {
+    const orderMap = new Map();   
+  
     for (const id in historyEdit) {
       const updateObj = {};
       for (const key in historyEdit[id]) {
@@ -333,13 +370,38 @@ if (!sumMap.has(key)) {
         if (value === '' || value === undefined) value = 0;
         updateObj[key] = value;
       }
-      await supabase.from('bills').update(updateObj).eq('id', id).eq('date', historyDate);
+  
+      // 找出這筆的名字與原始排序順序
+      const name = historyBills.find(h => h.id === Number(id))?.name;
+      const ori  = bills.find(b => b.name === name);
+      const order = ori?.order ?? 9999;
+      updateObj.order = order;
+  
+      await supabase
+        .from('bills')
+        .update(updateObj)
+        .eq('id', id)
+        .eq('date', historyDate);
+  
+      orderMap.set(name, order);
     }
+  
+    const { data: userData } = await supabase.auth.getUser();
+    const user = userData?.user;
+    for (const [name, order] of orderMap) {
+      await supabase
+        .from('bills')
+        .update({ order })
+        .eq('user_id', user.id)
+        .eq('name', name);
+    }
+  
     setShowHistory(false);
     setHistoryEdit({});
     fetchBills();
     fetchTodayTotals();
   }
+  
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-blue-100 to-blue-300">
