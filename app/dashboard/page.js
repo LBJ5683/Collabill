@@ -15,6 +15,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
+import useSessionGuard from '../../hooks/useSessionGuard'; 
 
 
 const FIELDS = [
@@ -35,6 +36,7 @@ const ICONS = {
 const HISTORY_ICON = '📜';
 
 export default function Dashboard() {
+  useSessionGuard();
   const [bills, setBills] = useState([]);
   const [, setLoading] = useState(false);
   const [showAdd, setShowAdd] = useState(false);

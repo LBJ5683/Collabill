@@ -16,8 +16,12 @@ export default function Login() {
     // 如果輸入內容包含 @ 則直接當 email，否則自動補 @fake.com
     const email = name.includes('@') ? name : `${name}@fake.com`;
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) setMsg(error.message);
-    else router.push('/dashboard');
+    if (error) {
+      setMsg(error.message);
+    } else {
+      localStorage.setItem("loginTime", Date.now()); // ⬅️ 新增這一行：儲存登入時間
+      router.push('/dashboard');
+    }    
   }
 
   return (
