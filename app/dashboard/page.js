@@ -98,20 +98,6 @@ useEffect(() => {
   const router = useRouter();
 
   // 使用指南彈窗
-
-
-  useEffect(() => {
-    fetchBills();
-    fetchTodayTotals();
-    
-  }, [fetchTodayTotals]);
-
-  // 取得今天日期
-  function getToday() {
-    return new Date().toISOString().slice(0, 10);
-  }
-
-  // 取得今日加總（和歷史記錄一致）
   const fetchTodayTotals = useCallback(async () => {
     const today = getToday();
     const { data } = await supabase.from('bills').select('*').eq('date', today);
@@ -124,8 +110,19 @@ useEffect(() => {
     });
     setTodayTotals(sum);
   }, []);
-  
 
+
+  useEffect(() => {
+    fetchBills();
+    fetchTodayTotals();
+    
+  }, [fetchTodayTotals]);
+
+  // 取得今天日期
+  function getToday() {
+    return new Date().toISOString().slice(0, 10);
+  }
+  
   // 剩餘金額總額（全部資料）
   const totalRemain = bills.reduce((sum, b) => sum + ((b.amount_in || 0) - (b.food || 0) - (b.drink || 0) - (b.other || 0)), 0);
 
