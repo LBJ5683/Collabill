@@ -18,7 +18,6 @@ import { AnimatePresence, motion } from 'framer-motion';
 import useSessionGuard from '../../hooks/useSessionGuard'; 
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
-import { format } from 'date-fns';
 
 
 const FIELDS = [
@@ -103,7 +102,8 @@ useEffect(() => {
   useEffect(() => {
     fetchBills();
     fetchTodayTotals();
-  }, []);
+    
+  }, [fetchTodayTotals]);
 
   // 取得今天日期
   function getToday() {
