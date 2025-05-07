@@ -18,6 +18,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import useSessionGuard from '../../hooks/useSessionGuard'; 
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
+import { useCallback } from 'react';
 
 
 const FIELDS = [
@@ -111,11 +112,9 @@ useEffect(() => {
   }
 
   // 取得今日加總（和歷史記錄一致）
-  async function fetchTodayTotals() {
+  const fetchTodayTotals = useCallback(async () => {
     const today = getToday();
-    // 查詢所有人今天的資料（不過濾 user_id）
     const { data } = await supabase.from('bills').select('*').eq('date', today);
-    // sum 同一個人同一天的所有資料
     const sum = { amount_in: 0, food: 0, drink: 0, other: 0 };
     (data || []).forEach(bill => {
       sum.amount_in += bill.amount_in || 0;
@@ -124,7 +123,8 @@ useEffect(() => {
       sum.other += bill.other || 0;
     });
     setTodayTotals(sum);
-  }
+  }, []);
+  
 
   // 剩餘金額總額（全部資料）
   const totalRemain = bills.reduce((sum, b) => sum + ((b.amount_in || 0) - (b.food || 0) - (b.drink || 0) - (b.other || 0)), 0);
