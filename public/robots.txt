@@ -1,4 +1,9 @@
+# *
 User-agent: *
 Allow: /
 
+# Host
+Host: https://collabill01.vercel.app
+
+# Sitemaps
 Sitemap: https://collabill01.vercel.app/sitemap.xml
