@@ -16,6 +16,9 @@ import { supabase } from '../../lib/supabaseClient';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import useSessionGuard from '../../hooks/useSessionGuard'; 
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
+import { format } from 'date-fns';
 
 
 const FIELDS = [
@@ -40,6 +43,10 @@ export default function Dashboard() {
   const [bills, setBills] = useState([]);
   const [, setLoading] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
+  const [exportStart, setExportStart] = useState('');
+  const [exportEnd,   setExportEnd]   = useState('');
+  const [exportType, setExportType] = useState('amount_in');
+  const [showExportModal, setShowExportModal] = useState(false);
   const [newName, setNewName] = useState('');
   const [addMsg, setAddMsg] = useState('');
   const tutorialImages = [
@@ -159,6 +166,80 @@ useEffect(() => {
     }
     setLoading(false);
   }
+
+  async function exportExcelByType(type) {
+    if (!exportStart || !exportEnd) {
+      alert('請選擇起始與結束日期');
+      return;
+    }
+  
+    const { data: userData } = await supabase.auth.getUser();
+    const user = userData?.user;
+    if (!user) return;
+  
+    const { data } = await supabase.from('bills').select('*')
+      .eq('user_id', user.id)
+      .gte('date', exportStart)
+      .lte('date', exportEnd);
+  
+    const nameSet = new Set();
+    const dateMap = new Map();
+    (data || []).forEach(row => {
+      const name = row.name?.trim();
+      if (!name) return;
+      nameSet.add(name);
+      if (!dateMap.has(row.date)) dateMap.set(row.date, {});
+      const obj = dateMap.get(row.date);
+      obj[name] = (obj[name] || 0) + (row[type] || 0);
+    });
+  
+    const names = Array.from(
+  new Set(bills.map(b => b.name?.trim()).filter(Boolean))
+);
+    const dates = Array.from(dateMap.keys()).sort();
+  
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet('報表');
+  
+    const header = ['日期', ...names, '當日總額'];
+    sheet.addRow(header);
+  
+    dates.forEach(date => {
+      const row = [date];
+      let dailyTotal = 0;
+      names.forEach(name => {
+        const val = dateMap.get(date)?.[name] || '';
+        row.push(val || '');
+        dailyTotal += val || 0;
+      });
+      row.push(dailyTotal);
+      const r = sheet.addRow(row);
+      r.getCell(row.length).font = { bold: true };
+      r.getCell(row.length).fill = {
+        type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFCC' }
+      };
+    });
+  
+    const totalRow = ['期間總額'];
+    names.forEach(name => {
+      let total = 0;
+      dates.forEach(date => total += dateMap.get(date)?.[name] || 0);
+      totalRow.push(total);
+    });
+    const grandTotal = totalRow.slice(1).reduce((a, b) => a + (b || 0), 0);
+    totalRow.push(grandTotal);
+  
+    const r = sheet.addRow(totalRow);
+    r.eachCell(cell => {
+      cell.font = { bold: true };
+      cell.fill = {
+        type: 'pattern', pattern: 'solid', fgColor: { argb: 'CCFFCC' }
+      };
+    });
+  
+    const buf = await workbook.xlsx.writeBuffer();
+    saveAs(new Blob([buf]), `${type}_報表.xlsx`);
+  }  
 
   function calcRemain(bill) {
     return (bill.amount_in || 0) - (bill.food || 0) - (bill.drink || 0) - (bill.other || 0);
@@ -757,19 +838,29 @@ if (!sumMap.has(key)) {
               </div>
             </div>
           )}
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold text-blue-800 tracking-wide">分帳表格</h1>
-            <div className="flex gap-3">
-              <button className="bg-white border border-blue-400 text-blue-700 px-4 py-2 rounded-lg shadow hover:bg-blue-50 transition font-semibold" onClick={() => router.push('/')}>返回首頁</button>
-              <button
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition font-semibold"
-                onClick={() => setShowAdd(true)}
-              >
-                新增參與者
-              </button>
-              <button className="bg-blue-400 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-500 transition font-semibold" onClick={() => setShowGuide(true)}>使用指南</button>
-            </div>
-          </div>
+<div className="flex justify-between items-center mb-8">
+  <div className="flex items-center gap-4">
+    <h1 className="text-3xl font-bold text-blue-800 tracking-wide">分帳表格</h1>
+    <button
+      className="border border-blue-700 text-blue-700 px-4 py-2 rounded hover:bg-blue-50 transition font-semibold"
+      onClick={() => setShowExportModal(true)}
+    >
+      匯出報表
+    </button>
+  </div>
+
+  <div className="flex gap-3">
+    <button className="bg-white border border-blue-400 text-blue-700 px-4 py-2 rounded-lg shadow hover:bg-blue-50 transition font-semibold" onClick={() => router.push('/')}>返回首頁</button>
+    <button
+      className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition font-semibold"
+      onClick={() => setShowAdd(true)}
+    >
+      新增參與者
+    </button>
+    <button className="bg-blue-400 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-500 transition font-semibold" onClick={() => setShowGuide(true)}>使用指南</button>
+  </div>
+</div>
+
           {/* 新增參與者表單 */}
           {showAdd && (
             <form onSubmit={handleAdd} className="mb-6 flex items-center gap-3 bg-blue-50 p-4 rounded-lg shadow border border-blue-200 max-w-md">
@@ -882,6 +973,65 @@ if (!sumMap.has(key)) {
   </a>
         </div>
       </main>
+      {showExportModal && (
+  <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+    <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md border border-green-400">
+      <h2 className="text-xl font-bold text-green-800 mb-4">匯出報表</h2>
+
+      <div className="mb-3">
+        <label className="block mb-1 text-green-900">起始日期</label>
+        <input
+          type="date"
+          className="w-full p-2 border border-green-300 rounded"
+          value={exportStart}
+          onChange={e => setExportStart(e.target.value)}
+        />
+      </div>
+
+      <div className="mb-3">
+        <label className="block mb-1 text-green-900">結束日期</label>
+        <input
+          type="date"
+          className="w-full p-2 border border-green-300 rounded"
+          value={exportEnd}
+          onChange={e => setExportEnd(e.target.value)}
+        />
+      </div>
+
+      <div className="mb-3">
+        <label className="block mb-1 text-green-900">選擇類型</label>
+        <select
+          className="w-full p-2 border border-green-300 rounded"
+          value={exportType}
+          onChange={e => setExportType(e.target.value)}
+        >
+          <option value="amount_in">💰 投入金額</option>
+          <option value="food">🍚 食物花費</option>
+          <option value="drink">🥤 飲料花費</option>
+          <option value="other">🛒 其他花費</option>
+        </select>
+      </div>
+
+      <div className="flex justify-end gap-2 mt-4">
+        <button
+          className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+          onClick={() => setShowExportModal(false)}
+        >
+          取消
+        </button>
+        <button
+          className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+          onClick={() => {
+            exportExcelByType(exportType);
+            setShowExportModal(false);
+          }}
+        >
+          匯出
+        </button>
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 }
