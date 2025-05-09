@@ -101,7 +101,15 @@ useEffect(() => {
   // 使用指南彈窗
   const fetchTodayTotals = useCallback(async () => {
     const today = getToday();
-    const { data } = await supabase.from('bills').select('*').eq('date', today);
+    const { data: userData } = await supabase.auth.getUser();
+const user = userData?.user;
+if (!user) return;
+
+const { data } = await supabase
+  .from('bills')
+  .select('*')
+  .eq('date', today)
+  .eq('user_id', user.id);
     const sum = { amount_in: 0, food: 0, drink: 0, other: 0 };
     (data || []).forEach(bill => {
       sum.amount_in += bill.amount_in || 0;
@@ -112,12 +120,14 @@ useEffect(() => {
     setTodayTotals(sum);
   }, []);
 
-
   useEffect(() => {
+  const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
     fetchBills();
     fetchTodayTotals();
-    
-  }, [fetchTodayTotals]);
+  });
+
+  return () => subscription.unsubscribe();
+}, []);
 
   // 取得今天日期
   function getToday() {
@@ -139,7 +149,9 @@ useEffect(() => {
     }
     setUserId(user.id);
     // 查詢只屬於這個 user 的資料
-    const { data } = await supabase.from('bills').select('*').eq('user_id', user.id).order('order', { ascending: true, nullsLast: true }).order('id', { ascending: true });;
+    const { data } = await supabase.from('bills').select('*').eq('user_id', user.id).order('order', { ascending: true, nullsLast: true }).order('id', { ascending: true });
+
+
     if (data) {
       // 以 name.trim() 分組加總，只顯示 name 不為空的資料
       const sumMap = new Map();
@@ -192,9 +204,8 @@ useEffect(() => {
       obj[name] = (obj[name] || 0) + (row[type] || 0);
     });
   
-    const names = Array.from(
-  new Set(bills.map(b => b.name?.trim()).filter(Boolean))
-);
+   const names = Array.from(nameSet);
+
     const dates = Array.from(dateMap.keys()).sort();
   
     const workbook = new ExcelJS.Workbook();
@@ -378,13 +389,29 @@ const { error } = await supabase.from('bills').insert([
       setDeleteMsg('找不到該參與者');
       return;
     }
+  
     if (deleteName.trim() !== target.name) {
       setDeleteMsg('名字不正確，請重新輸入');
       return;
     }
-    if (!window.confirm(`確定要刪除「${target.name}」嗎？此動作無法復原。`)) return;
-    // 一次刪除這個人所有資料
-    await supabase.from('bills').delete().eq('name', target.name);
+  
+    // ✅ 補上這段：取得目前登入的使用者
+    const { data: userData } = await supabase.auth.getUser();
+    const user = userData?.user;
+    if (!user) {
+      setDeleteMsg('請先登入');
+      return;
+    }
+  
+    if (!window.confirm(`確定要刪除「${target.name}」嗎？此動作無法復原 °□°`)) return;
+  
+    // ✅ 現在才可以安全執行刪除
+    await supabase
+      .from('bills')
+      .delete()
+      .eq('user_id', user.id)
+      .eq('name', target.name);
+  
     setShowDeleteDialog(false);
     setDeleteId(null);
     setDeleteName('');
@@ -392,6 +419,7 @@ const { error } = await supabase.from('bills').insert([
     fetchBills();
     fetchTodayTotals();
   }
+  
 
   // 歷史記錄
   async function openHistory() {
