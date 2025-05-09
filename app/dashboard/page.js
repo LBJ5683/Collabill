@@ -41,6 +41,8 @@ const HISTORY_ICON = '📜';
 export default function Dashboard() {
   useSessionGuard();
   const [bills, setBills] = useState([]);
+  const [copied, setCopied] = useState(false);
+  const [userId, setUserId] = useState(null); 
   const [, setLoading] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
   const [exportStart, setExportStart] = useState('');
@@ -136,6 +138,7 @@ useEffect(() => {
       setLoading(false);
       return;
     }
+    setUserId(user.id);
     // 查詢只屬於這個 user 的資料
     const { data } = await supabase.from('bills').select('*').eq('user_id', user.id).order('order', { ascending: true, nullsLast: true }).order('id', { ascending: true });;
     if (data) {
@@ -540,6 +543,16 @@ if (!sumMap.has(key)) {
             <div className="px-4 py-2 bg-blue-100 border border-blue-300 rounded-md text-blue-900 font-semibold text-xl whitespace-nowrap">
    剩餘金額總額：{totalRemain}
 </div>
+ {userId && (
+    <div className="absolute top-5 right-10 flex flex-col items-center">
+      <div className="text-xs text-gray-600 mb-1">分享唯讀連結</div>
+      <img
+        src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://collabill01.vercel.app/view?uid=${userId}`}
+        alt="QR Code"
+        className="w-24 h-24 border rounded shadow"
+      />
+    </div>
+  )}
 
           </div>
           {showGuide && (
@@ -853,7 +866,6 @@ if (!sumMap.has(key)) {
       匯出報表
     </button>
   </div>
-
   <div className="flex gap-3">
     <button className="bg-white border border-blue-400 text-blue-700 px-4 py-2 rounded-lg shadow hover:bg-blue-50 transition font-semibold" onClick={() => router.push('/')}>返回首頁</button>
     <button
