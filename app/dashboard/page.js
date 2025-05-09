@@ -41,7 +41,6 @@ const HISTORY_ICON = '📜';
 export default function Dashboard() {
   useSessionGuard();
   const [bills, setBills] = useState([]);
-  const [copied, setCopied] = useState(false);
   const [userId, setUserId] = useState(null); 
   const [, setLoading] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
