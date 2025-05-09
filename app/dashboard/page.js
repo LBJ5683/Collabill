@@ -526,13 +526,21 @@ if (!sumMap.has(key)) {
       {/* 右側主區 */}
       <main className="flex-1 p-10">
         <div className="flex-1 flex flex-col">
+          {/* 今日統計 */}
+          <div className="mb-4 flex flex-wrap gap-6 items-center">
+           <div className="text-lg font-bold text-green-700">今日投入：</div>
+           <div className="text-base text-green-900">💰 投入金額：{todayTotals.amount_in}</div>
+          </div>
           {/* 今日花費統計 */}
           <div className="mb-4 flex flex-wrap gap-6 items-center">
             <div className="text-lg font-bold text-blue-700">今日花費：</div>
             <div className="text-base text-blue-900">🍚 食物：{todayTotals.food}</div>
             <div className="text-base text-blue-900">🥤 飲料：{todayTotals.drink}</div>
             <div className="text-base text-blue-900">🛒 其他：{todayTotals.other}</div>
-            <div className="text-base text-blue-900 font-bold ml-4">剩餘金額總額：{totalRemain}</div>
+            <div className="px-4 py-2 bg-blue-100 border border-blue-300 rounded-md text-blue-900 font-semibold text-xl whitespace-nowrap">
+   剩餘金額總額：{totalRemain}
+</div>
+
           </div>
           {showGuide && (
   <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
