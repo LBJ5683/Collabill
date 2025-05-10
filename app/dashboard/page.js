@@ -123,13 +123,16 @@ const { data } = await supabase
   }, []);
 
   useEffect(() => {
-    const { data: subscription } = supabase.auth.onAuthStateChange(() => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(() => {
       fetchBills();
       fetchTodayTotals();
     });
   
-    return () => subscription.unsubscribe();
-  }, [fetchTodayTotals]);  
+    return () => subscription?.unsubscribe();
+  }, [fetchTodayTotals]);
+   
   
   useEffect(() => {
     const result = supabase.auth.onAuthStateChange((event) => {
