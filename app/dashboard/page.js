@@ -132,9 +132,7 @@ const { data } = await supabase
   }, [fetchTodayTotals]);  
   
   useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event) => {
+    const result = supabase.auth.onAuthStateChange((event) => {
       if (event === 'TOKEN_REFRESH_FAILED') {
         console.warn('🔐 Refresh token 無效，自動登出');
         supabase.auth.signOut();
@@ -142,7 +140,13 @@ const { data } = await supabase
       }
     });
   
-    return () => subscription.unsubscribe();
+    return () => {
+      try {
+        result?.data?.subscription?.unsubscribe?.(); 
+      } catch (e) {
+        console.warn('取消 Supabase 訂閱時發生錯誤', e);
+      }
+    };
   }, [router]);  
 
 
