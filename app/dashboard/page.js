@@ -68,13 +68,15 @@ export default function Dashboard() {
   const [modalMsg, setModalMsg] = useState('');
   const [modalDate, setModalDate] = useState(() => new Date().toISOString().slice(0, 10));
 
-useEffect(() => {
-  try {
-    (window.adsbygoogle = window.adsbygoogle || []).push({});
-  } catch (e) {
-    console.error('Adsense error', e);
-  }
-}, []);
+  useEffect(() => {
+    try {
+      if (window?.adsbygoogle?.push) {
+        window.adsbygoogle.push({});
+      }
+    } catch (e) {
+      console.error('AdSense push error:', e);
+    }
+  }, []);  
 
   // 刪除確認
   const [deleteId, setDeleteId] = useState(null);
