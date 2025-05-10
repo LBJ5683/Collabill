@@ -130,7 +130,7 @@ const { data } = await supabase
   }, [fetchTodayTotals]);  
   
   useEffect(() => {
-    const { data: listener } = supabase.auth.onAuthStateChange((event) => {
+    const { data: _ } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'TOKEN_REFRESH_FAILED') {
         console.warn('🔐 Refresh token 無效，自動登出');
         supabase.auth.signOut();
