@@ -139,7 +139,7 @@ const { data } = await supabase
       if (event === 'TOKEN_REFRESH_FAILED') {
         console.warn('🔐 Refresh token 無效，自動登出');
         supabase.auth.signOut();
-        router.replace('/login');
+        router.replace('/');
       }
     });
   
