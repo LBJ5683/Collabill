@@ -89,45 +89,54 @@ export default function ViewPage() {
       {bills.length > 0 ? (
         <div className="w-full overflow-x-auto sm:overflow-visible">
           <table className="min-w-[640px] sm:min-w-full text-sm text-center bg-white shadow border border-blue-200 rounded">
-            <thead className="bg-blue-100 text-blue-700">
-              <tr>
-                <th rowSpan={2} className="px-2 py-3 align-middle">姓名</th>
-                <th rowSpan={2} className="px-2 py-3 align-middle">📅 今日紀錄</th>
-                <th colSpan={4} className="px-2 py-2">💰 總計項目</th>
-                <th rowSpan={2} className="px-2 py-3 align-middle">剩餘</th>
-              </tr>
-              <tr>
-                <th className="px-2 py-2">投入</th>
-                <th className="px-2 py-2">🍚 食物</th>
-                <th className="px-2 py-2">🥤 飲料</th>
-                <th className="px-2 py-2">🛒 其他</th>
-              </tr>
-            </thead>
-            <tbody>
-              {bills.map((b, i) => (
-                <tr key={i} className="border-t hover:bg-blue-50">
-                  <td className="px-2 py-2 whitespace-nowrap">{b.name}</td>
-                  <td className="px-2 py-2 text-xs text-gray-600 whitespace-nowrap w-[96px] overflow-hidden text-ellipsis">
-                    {todayNameMap.has(b.name) && (() => {
-                      const t = todayNameMap.get(b.name);
-                      const parts = [];
-                      if (t.in    > 0) parts.push(`投入 ${t.in}`);
-                      if (t.food  > 0) parts.push(`食 ${t.food}`);
-                      if (t.drink > 0) parts.push(`飲 ${t.drink}`);
-                      if (t.other > 0) parts.push(`其他 ${t.other}`);
-                      return parts.join(' / ');
-                    })()}
-                  </td>
-                  <td className="px-2 py-2">{b.amount_in || 0}</td>
-                  <td className="px-2 py-2">{b.food || 0}</td>
-                  <td className="px-2 py-2">{b.drink || 0}</td>
-                  <td className="px-2 py-2">{b.other || 0}</td>
-                  <td className="px-2 py-2 font-semibold">
-                    {calcRemain(b) < 0 ? <span className="text-red-600">{calcRemain(b)}</span> : calcRemain(b)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
+          <thead className="bg-blue-100 text-blue-700">
+  <tr>
+    <th rowSpan={2} className="px-2 py-3 align-middle">姓名</th>
+    <th rowSpan={2} className="px-2 py-3 align-middle">📅 今日紀錄</th>
+    <th rowSpan={2} className="px-2 py-3 align-middle">💡 剩餘</th>
+    <th colSpan={4} className="px-2 py-2">💰 總計項目</th>
+  </tr>
+  <tr>
+    <th className="px-2 py-2">投入</th>
+    <th className="px-2 py-2">🍚 食物</th>
+    <th className="px-2 py-2">🥤 飲料</th>
+    <th className="px-2 py-2">🛒 其他</th>
+  </tr>
+</thead>
+
+<tbody>
+  {bills.map((b, i) => (
+    <tr key={i} className="border-t hover:bg-blue-50">
+      <td className="px-2 py-2 whitespace-nowrap">{b.name}</td>
+
+      {/* 今日紀錄 */}
+      <td className="px-2 py-2 text-xs text-gray-600 whitespace-nowrap w-[96px] overflow-hidden text-ellipsis">
+        {todayNameMap.has(b.name) && (() => {
+          const t = todayNameMap.get(b.name);
+          const p = [];
+          if (t.in)    p.push(`投入 ${t.in}`);
+          if (t.food)  p.push(`食 ${t.food}`);
+          if (t.drink) p.push(`飲 ${t.drink}`);
+          if (t.other) p.push(`其他 ${t.other}`);
+          return p.join(' / ');
+        })()}
+      </td>
+
+      {/* 剩餘 */}
+      <td className="px-2 py-2 font-semibold">
+        {calcRemain(b) < 0
+          ? <span className="text-red-600">{calcRemain(b)}</span>
+          : calcRemain(b)}
+      </td>
+
+      {/* 四大總計 */}
+      <td className="px-2 py-2">{b.amount_in || 0}</td>
+      <td className="px-2 py-2">{b.food      || 0}</td>
+      <td className="px-2 py-2">{b.drink     || 0}</td>
+      <td className="px-2 py-2">{b.other     || 0}</td>
+    </tr>
+  ))}
+</tbody>
           </table>
         </div>
       ) : (

@@ -129,6 +129,21 @@ const { data } = await supabase
   return () => subscription.unsubscribe();
 }, []);
 
+useEffect(() => {
+  const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+    if (event === 'TOKEN_REFRESH_FAILED') {
+      console.warn('🔐 Refresh token 無效，自動登出');
+      supabase.auth.signOut();
+      router.replace('/login');
+    }
+  });
+
+  return () => {
+    listener?.subscription?.unsubscribe();
+  };
+}, []);
+
+
   // 取得今天日期
   function getToday() {
     return new Date().toISOString().slice(0, 10);
@@ -512,9 +527,9 @@ if (!sumMap.has(key)) {
   
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-blue-100 to-blue-300">
+    <div className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br from-blue-100 to-blue-300">
       {/* 左側欄 */}
-      <aside className="w-64 bg-white/95 shadow-lg flex flex-col p-8 rounded-r-3xl border-r border-blue-200">
+      <aside className="w-full md:w-64 bg-white/95 shadow-lg flex flex-col p-8 rounded-r-3xl border-r border-blue-300">
         {/* 投入 */}
         <div className="mb-10">
           <div className="text-blue-700 font-bold text-xl mb-2 tracking-wide">投入</div>
@@ -554,7 +569,7 @@ if (!sumMap.has(key)) {
         </div>
       </aside>
       {/* 右側主區 */}
-      <main className="flex-1 p-10">
+      <main className="flex-1 p-4 md:p-10">
         <div className="flex-1 flex flex-col">
           {/* 今日統計 */}
           <div className="mb-4 flex flex-wrap gap-6 items-center">
@@ -570,16 +585,23 @@ if (!sumMap.has(key)) {
             <div className="px-4 py-2 bg-blue-100 border border-blue-300 rounded-md text-blue-900 font-semibold text-xl whitespace-nowrap">
    剩餘金額總額：{totalRemain}
 </div>
- {userId && (
-    <div className="absolute top-5 right-10 flex flex-col items-center">
-      <div className="text-xs text-gray-600 mb-1">分享唯讀連結</div>
-      <img
-        src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://collabill01.vercel.app/view?uid=${userId}`}
-        alt="QR Code"
-        className="w-24 h-24 border rounded shadow"
-      />
-    </div>
-  )}
+{userId && (
+  <div className="absolute top-5 right-10 flex flex-col items-center">
+    <a
+      href={`https://collabill01.vercel.app/view?uid=${userId}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-xs text-blue-600 underline mb-1 hover:text-blue-800"
+    >
+      分享唯讀連結
+    </a>
+    <img
+      src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://collabill01.vercel.app/view?uid=${userId}`}
+      alt="QR Code"
+      className="w-24 h-24 border rounded shadow"
+    />
+  </div>
+)}
 
           </div>
           {showGuide && (
@@ -633,7 +655,8 @@ if (!sumMap.has(key)) {
           {/* Modal 批次填寫投入/花費 */}
           {showModal && (
             <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-              <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-lg border border-blue-200">
+              <div className="bg-white rounded-lg shadow-lg p-4 md:p-8 w-full max-w-lg
+            border border-blue-200 max-h-[90vh] overflow-y-auto flex flex-col">
                 <h2 className="text-lg font-bold mb-4 text-blue-700">{FIELDS.find(f => f.key === modalField)?.label || ''}（{modalDate}）</h2>
                 <form onSubmit={handleModalSubmit}>
                 <div className="mb-3">
@@ -646,7 +669,7 @@ if (!sumMap.has(key)) {
   />
 </div>
 
-                  <div className="space-y-3 max-h-72 overflow-y-auto mb-4">
+                    <div className="flex-1 space-y-3 overflow-y-auto mb-4">
                     {bills.map(bill => (
                       <div key={bill.id} className="flex items-center gap-2">
                         <span className="w-24 text-blue-900">{bill.name}</span>
@@ -716,7 +739,8 @@ if (!sumMap.has(key)) {
           {/* 歷史記錄 Modal */}
           {showHistory && (
             <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-              <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-2xl border-2 border-blue-400">
+              <div className="bg-white rounded-lg shadow-lg p-4 md:p-8 w-full max-w-2xl
+  border-2 border-blue-400 h-[90vh] md:max-h-[80vh] md:h-auto overflow-y-auto flex flex-col">
                 <h2 className="text-2xl font-extrabold mb-4 text-blue-900 flex items-center gap-2">
                   <span className="inline-block bg-blue-100 text-blue-700 px-3 py-1 rounded-full">{HISTORY_ICON} 歷史記錄</span>
                   <span className="text-base font-normal text-blue-500">（可查詢、編輯指定日資料）</span>
@@ -740,8 +764,8 @@ if (!sumMap.has(key)) {
                   >查詢</button>
                 </div>
                 {historyQueried && (
-                  <div className="overflow-x-auto rounded-xl shadow bg-white/95 border border-blue-200 mb-4 max-h-[400px] overflow-auto">
-                    <table className="min-w-full text-center">
+                  <div className="flex-1 overflow-x-auto overflow-y-auto min-h-[200px] rounded-xl shadow bg-white/95 border border-blue-200 mb-4">
+                    <table className="w-full text-center text-sm">
                       <thead className="bg-blue-50 text-blue-700">
                         <tr>
                           <th className="px-2 py-3">序</th>
@@ -765,7 +789,7 @@ if (!sumMap.has(key)) {
                                 type="text"
                                 inputMode="numeric"
                                 pattern="[0-9]*"
-                                className="w-20 p-1 border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                className="w-14 p-1 border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
                                 value={
                                   historyEdit[bill.id]?.amount_in !== undefined
                                     ? historyEdit[bill.id].amount_in
@@ -935,7 +959,7 @@ if (!sumMap.has(key)) {
             <table className="min-w-full text-center">
               <thead className="bg-blue-100 text-blue-700">
                 <tr>
-                  <th className="px-2 py-3">序</th>
+                  <th className="px-4 py-3">序</th>
                   <th className="px-4 py-3">姓名</th>
                   <th className="px-4 py-3">投入金額</th>
                   <th className="px-4 py-3">食物花費</th>
