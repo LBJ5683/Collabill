@@ -139,7 +139,7 @@ const { data } = await supabase
     });
   
     return () => {
-      listener?.subscription?.unsubscribe();
+      subscription.unsubscribe();
     };
   }, []);  
 
