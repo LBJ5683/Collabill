@@ -132,14 +132,18 @@ const { data } = await supabase
   }, [fetchTodayTotals]);  
   
   useEffect(() => {
-    supabase.auth.onAuthStateChange((event) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'TOKEN_REFRESH_FAILED') {
         console.warn('🔐 Refresh token 無效，自動登出');
         supabase.auth.signOut();
         router.replace('/login');
       }
     });
-  }, []);
+  
+    return () => subscription.unsubscribe();
+  }, [router]);  
 
 
   // 取得今天日期
