@@ -127,7 +127,7 @@ const { data } = await supabase
     });
   
     return () => subscription.unsubscribe();
-  }, []);
+  }, [fetchTodayTotals]);  
   
   useEffect(() => {
     const { data: listener } = supabase.auth.onAuthStateChange((event) => {
