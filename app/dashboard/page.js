@@ -121,27 +121,27 @@ const { data } = await supabase
   }, []);
 
   useEffect(() => {
-  const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
-    fetchBills();
-    fetchTodayTotals();
-  });
-
-  return () => subscription.unsubscribe();
-}, []);
-
-useEffect(() => {
-  const { data: listener } = supabase.auth.onAuthStateChange((event, _session) => {
-    if (event === 'TOKEN_REFRESH_FAILED') {
-      console.warn('🔐 Refresh token 無效，自動登出');
-      supabase.auth.signOut();
-      router.replace('/login');
-    }
-  });
-
-  return () => {
-    listener?.subscription?.unsubscribe();
-  };
-}, []);
+    const { data: subscription } = supabase.auth.onAuthStateChange(() => {
+      fetchBills();
+      fetchTodayTotals();
+    });
+  
+    return () => subscription.unsubscribe();
+  }, []);
+  
+  useEffect(() => {
+    const { data: listener } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'TOKEN_REFRESH_FAILED') {
+        console.warn('🔐 Refresh token 無效，自動登出');
+        supabase.auth.signOut();
+        router.replace('/login');
+      }
+    });
+  
+    return () => {
+      listener?.subscription?.unsubscribe();
+    };
+  }, []);  
 
 
   // 取得今天日期
