@@ -17,7 +17,7 @@ export default function useSessionGuard({
       if (!loginTime || now - loginTime > maxSessionTime) {
         supabase.auth.signOut()
         localStorage.clear()
-        router.push('/login')
+        router.push('/')
       }
     }
 
@@ -31,7 +31,7 @@ export default function useSessionGuard({
       idleTimer = setTimeout(() => {
         supabase.auth.signOut()
         localStorage.clear()
-        router.push('/login')
+        router.push('/') 
       }, idleTime)
     }
 
