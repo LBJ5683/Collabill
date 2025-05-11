@@ -154,7 +154,14 @@ const { data } = await supabase
    
   
   useEffect(() => {
-    const result = supabase.auth.onAuthStateChange((event) => {
+    const { data: subscription } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('🟢 auth state changed:', event);
+  
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        fetchBills();          // 👈 重新抓使用者資料
+        fetchTodayTotals();    // 👈 重新抓今日統計
+      }
+  
       if (event === 'TOKEN_REFRESH_FAILED') {
         console.warn('🔐 Refresh token 無效，自動登出');
         supabase.auth.signOut();
@@ -164,12 +171,12 @@ const { data } = await supabase
   
     return () => {
       try {
-        result?.data?.subscription?.unsubscribe?.(); 
+        subscription?.unsubscribe?.();
       } catch (e) {
         console.warn('取消 Supabase 訂閱時發生錯誤', e);
       }
     };
-  }, [router]);  
+  }, [fetchTodayTotals, router]);   
 
 
   // 取得今天日期
