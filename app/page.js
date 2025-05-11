@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Script from 'next/script';
 
 export default function HomePage() {
   const [modalImage, setModalImage] = useState(null);
