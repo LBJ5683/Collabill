@@ -89,16 +89,6 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Google AdSense 廣告區塊 */}
-      <div className="w-full flex justify-center mt-10">
-        <ins className="adsbygoogle"
-          style={{ display: 'block' }}
-          data-ad-client="ca-pub-7785145306323259"
-          data-ad-slot="8559364872"
-          data-ad-format="auto"
-          data-full-width-responsive="true"></ins>
-      </div>
-
       {/* 圖片放大 modal */}
       {modalImage && (
         <div
@@ -112,14 +102,6 @@ export default function HomePage() {
           />
         </div>
       )}
-
-      {/* AdSense script loader */}
-      <Script
-        async
-        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7785145306323259"
-        strategy="afterInteractive"
-        crossOrigin="anonymous"
-      />
     </div>
   );
 }

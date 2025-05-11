@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabaseClient';
+import Script from 'next/script';
 
 export default function ViewPage() {
   const [rawBills, setRawBills] = useState([]);
@@ -142,6 +143,22 @@ export default function ViewPage() {
       ) : (
         <p className="text-gray-600 mt-6">⚠️ 查無資料，或使用者 ID 無效。</p>
       )}
+      {/* ✅ 廣告放在這裡，獨立在條件之外 */}
+<div className="w-full flex justify-center mt-10">
+  <ins className="adsbygoogle"
+    style={{ display: 'block' }}
+    data-ad-client="ca-pub-7785145306323259"
+    data-ad-slot="8559364872"
+    data-ad-format="auto"
+    data-full-width-responsive="true"
+  ></ins>
+</div>
+<Script
+  async
+  src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7785145306323259"
+  strategy="afterInteractive"
+  crossOrigin="anonymous"
+/>
     </div>
   );
 }
