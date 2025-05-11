@@ -157,16 +157,17 @@ const { data } = await supabase
     const { data: subscription } = supabase.auth.onAuthStateChange((event, _session) => {
       console.log('🟢 auth state changed:', event);
   
-      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-        fetchBills();          // 👈 重新抓使用者資料
-        fetchTodayTotals();    // 👈 重新抓今日統計
-      }
-  
-      if (event === 'TOKEN_REFRESH_FAILED') {
-        console.warn('🔐 Refresh token 無效，自動登出');
-        supabase.auth.signOut();
-        router.replace('/');
-      }
+      (event) => {
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+          fetchBills();
+          fetchTodayTotals();
+        }
+        if (event === 'TOKEN_REFRESH_FAILED') {
+          console.warn('🔐 Refresh token 無效，自動登出');
+          supabase.auth.signOut();
+          router.replace('/');
+        }
+      }      
     });
   
     return () => {
