@@ -40,6 +40,7 @@ const HISTORY_ICON = '📜';
 
 export default function Dashboard() {
   useSessionGuard();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [bills, setBills] = useState([]);
   const [userId, setUserId] = useState(null); 
   const [, setLoading] = useState(false);
@@ -50,12 +51,31 @@ export default function Dashboard() {
   const [showExportModal, setShowExportModal] = useState(false);
   const [newName, setNewName] = useState('');
   const [addMsg, setAddMsg] = useState('');
-  const tutorialImages = [
-    '/guide/page1.png',
-    '/guide/page2.png',
-    '/guide/page3.png',
-    '/guide/page4.png',
-    '/guide/page5.png'
+  const tutorialText = [
+    {
+      title: '新增參與者',
+      content: '點擊右上角「新增參與者」按鈕，輸入名字後即可加入分帳表。'
+    },
+    {
+      title: '輸入金額',
+      content: '點擊左側欄的「投入金額」或「花費項目」，可批次填寫當日數據。'
+    },
+    {
+      title: '拖曳排序',
+      content: '按住姓名左側的 ☰ 圖示即可拖曳排序，順序會自動儲存。'
+    },
+    {
+      title: '查詢與編輯',
+      content: '點「歷史記錄」查詢特定日期資料，並可點「編輯」修改內容。'
+    },
+    {
+      title: '匯出報表',
+      content: '可選擇時間與類型匯出 Excel 報表，適合做結算統計用。'
+    },
+    {
+      title: '分享唯讀頁',
+      content: '右上角會顯示專屬 QR Code 與連結，可分享給他人瀏覽。'
+    },
   ];
   
   const [showGuide, setShowGuide] = useState(false);
@@ -338,12 +358,14 @@ const { error } = await supabase.from('bills').insert([
   }
   async function handleModalSubmit(e) {
     e.preventDefault();
+    setIsSubmitting(true);
     setModalMsg('');
     // 取得目前登入的 user
     const { data: userData } = await supabase.auth.getUser();
     const user = userData?.user;
     if (!user) {
       setModalMsg('請先登入');
+      setIsSubmitting(false);
       return;
     }
     for (const id in modalValues) {
@@ -615,7 +637,7 @@ if (!sumMap.has(key)) {
           </div>
           {showGuide && (
   <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-    <div className="bg-white rounded-lg p-4 max-w-5xl w-full relative">
+    <div className="bg-white rounded-lg p-4 w-full max-w-xl max-h-[90vh] overflow-y-auto relative">
       <button
         className="absolute top-2 right-2 text-gray-600 text-lg"
         onClick={() => setShowGuide(false)}
@@ -625,38 +647,14 @@ if (!sumMap.has(key)) {
 
 ...
 
-<div className="h-[80vh] w-full relative flex items-center justify-center overflow-hidden">
-  <AnimatePresence mode="wait">
-    <motion.img
-      key={currentImageIndex}
-      src={tutorialImages[currentImageIndex]}
-      alt={`使用指南第 ${currentImageIndex + 1} 張`}
-      initial={{ x: 100, opacity: 0 }}
-      animate={{ x: 0, opacity: 1 }}
-      exit={{ x: -100, opacity: 0 }}
-      transition={{ duration: 0.3 }}
-      className="absolute h-full max-h-[80vh] max-w-full object-contain"
-    />
-  </AnimatePresence>
+<div className="flex-1 px-2 py-6 overflow-y-auto text-blue-900 text-base leading-relaxed space-y-4">
+  {tutorialText.map((item, index) => (
+    <div key={index}>
+      <h2 className="font-bold text-lg mb-1">{item.title}</h2>
+      <p>{item.content}</p>
+    </div>
+  ))}
 </div>
-
-
-      <div className="flex justify-between mt-4">
-        <button
-          disabled={currentImageIndex === 0}
-          onClick={() => setCurrentImageIndex(i => i - 1)}
-          className="px-3 py-1 rounded bg-gray-200 disabled:opacity-50"
-        >
-          ← 上一張
-        </button>
-        <button
-          disabled={currentImageIndex === tutorialImages.length - 1}
-          onClick={() => setCurrentImageIndex(i => i + 1)}
-          className="px-3 py-1 rounded bg-blue-500 text-white disabled:opacity-50"
-        >
-          下一張 →
-        </button>
-      </div>
     </div>
   </div>
 )}
@@ -704,11 +702,12 @@ if (!sumMap.has(key)) {
                       取消
                     </button>
                     <button
-                      type="submit"
-                      className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                    >
-                      儲存
-                    </button>
+  type="submit"
+  disabled={isSubmitting}
+  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+>
+  {isSubmitting ? '儲存中...' : '儲存'}
+</button>
                   </div>
                 </form>
               </div>
@@ -985,6 +984,9 @@ if (!sumMap.has(key)) {
   setList={setBills}
   handle=".drag-handle"
   animation={150}
+  ghostClass="drag-ghost"
+  chosenClass="drag-chosen"
+  forceFallback={true}
   onEnd={async ({ oldIndex, newIndex }) => {
     const updated = arrayMove(bills, oldIndex, newIndex);
     setBills(updated);
@@ -1005,7 +1007,10 @@ if (!sumMap.has(key)) {
   {bills.map((bill, idx) => (
     <tr key={bill.id} className="hover:bg-blue-50 transition">
       <td className="px-2 py-2">{idx + 1}</td>
-      <td className="px-4 py-2 drag-handle cursor-move">{bill.name}</td>
+      <td className="px-4 py-2 flex items-center gap-2">
+  <span className="drag-handle cursor-move text-gray-400 hover:text-gray-600">☰</span>
+  {bill.name}
+</td>
       <td className="px-4 py-2">{bill.amount_in || 0}</td>
       <td className="px-4 py-2">{bill.food || 0}</td>
       <td className="px-4 py-2">{bill.drink || 0}</td>

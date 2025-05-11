@@ -26,3 +26,21 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+/* 拖動時的殘影樣式 */
+.drag-ghost {
+  opacity: 0.4;
+  background-color: #e0f2fe; /* 淡藍背景 */
+}
+
+.drag-chosen {
+  opacity: 0.9;
+  transform: scale(1.02);
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
+}
+
+/* 👇 拖動時的 clone 殘影控制 */
+.sortable-fallback {
+  opacity: 0 !important;
+  pointer-events: none;
+  transform: translateX(-9999px);
+}

@@ -39,6 +39,14 @@ export default function useSessionGuard({
     events.forEach(event => window.addEventListener(event, resetIdleTimer))
     resetIdleTimer()
 
+        // ✅ 當頁面從背景回到前台時，重新檢查
+        const handleVisibilityChange = () => {
+          if (document.visibilityState === 'visible') {
+            checkLoginTime();
+          }
+        };
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
     // ✅ 清除定時器與事件
     return () => {
       clearInterval(sessionInterval)
