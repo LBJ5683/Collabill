@@ -178,6 +178,24 @@ const { data } = await supabase
     };
   }, [fetchTodayTotals, router]);     
 
+  useEffect(() => {
+    const channel = supabase
+      .channel('bills-updates')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'bills' },
+        (payload) => {
+          console.log('📡 Detected change:', payload);
+          fetchBills();
+          fetchTodayTotals();
+        }
+      )
+      .subscribe();
+  
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   // 取得今天日期
   function getToday() {
