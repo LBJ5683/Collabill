@@ -14,7 +14,6 @@ function arrayMove(arr, fromIndex, toIndex) {
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import { useRouter } from 'next/navigation';
-import { AnimatePresence, motion } from 'framer-motion';
 import useSessionGuard from '../../hooks/useSessionGuard'; 
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
@@ -79,7 +78,6 @@ export default function Dashboard() {
   ];
   
   const [showGuide, setShowGuide] = useState(false);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   
   // Modal 狀態
   const [showModal, setShowModal] = useState(false);
