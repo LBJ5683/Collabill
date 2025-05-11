@@ -377,6 +377,7 @@ const { error } = await supabase.from('bills').insert([
     setModalField(field);
     setModalValues({});
     setModalMsg('');
+    setIsSubmitting(false);
     setModalDate(new Date().toISOString().slice(0, 10));
     setShowModal(true);
   }
