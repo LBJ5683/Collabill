@@ -154,20 +154,19 @@ const { data } = await supabase
    
   
   useEffect(() => {
-    const { data: subscription } = supabase.auth.onAuthStateChange((event, _session) => {
+    const { data: subscription } = supabase.auth.onAuthStateChange((event) => {
       console.log('🟢 auth state changed:', event);
   
-      (event) => {
-        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-          fetchBills();
-          fetchTodayTotals();
-        }
-        if (event === 'TOKEN_REFRESH_FAILED') {
-          console.warn('🔐 Refresh token 無效，自動登出');
-          supabase.auth.signOut();
-          router.replace('/');
-        }
-      }      
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        fetchBills();
+        fetchTodayTotals();
+      }
+  
+      if (event === 'TOKEN_REFRESH_FAILED') {
+        console.warn('🔐 Refresh token 無效，自動登出');
+        supabase.auth.signOut();
+        router.replace('/');
+      }
     });
   
     return () => {
@@ -177,7 +176,7 @@ const { data } = await supabase
         console.warn('取消 Supabase 訂閱時發生錯誤', e);
       }
     };
-  }, [fetchTodayTotals, router]);   
+  }, [fetchTodayTotals, router]);     
 
 
   // 取得今天日期
