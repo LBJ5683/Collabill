@@ -154,7 +154,7 @@ const { data } = await supabase
    
   
   useEffect(() => {
-    const { data: subscription } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: subscription } = supabase.auth.onAuthStateChange((event, _session) => {
       console.log('🟢 auth state changed:', event);
   
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
