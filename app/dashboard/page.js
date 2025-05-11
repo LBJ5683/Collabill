@@ -40,6 +40,7 @@ const HISTORY_ICON = '📜';
 export default function Dashboard() {
   useSessionGuard();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSavingHistory, setIsSavingHistory] = useState(false);
   const [bills, setBills] = useState([]);
   const [userId, setUserId] = useState(null); 
   const [, setLoading] = useState(false);
@@ -513,6 +514,7 @@ if (!sumMap.has(key)) {
     setHistoryEdit({});
   }
   async function saveHistoryEdit() {
+    setIsSavingHistory(true);
     const orderMap = new Map();   
   
     for (const id in historyEdit) {
@@ -552,6 +554,7 @@ if (!sumMap.has(key)) {
     setHistoryEdit({});
     fetchBills();
     fetchTodayTotals();
+    setIsSavingHistory(false);
   }
   
 
@@ -903,11 +906,16 @@ if (!sumMap.has(key)) {
                   )}
                   {historyViewMode === 'edit' && historyQueried && (
                     <button
-                      className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                      onClick={async () => { await saveHistoryEdit(); setHistoryViewMode('view'); setHistoryQueried(false); }}
-                    >
-                      儲存
-                    </button>
+                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+                    onClick={async () => {
+                      await saveHistoryEdit();
+                      setHistoryViewMode('view');
+                      setHistoryQueried(false);
+                    }}
+                    disabled={isSavingHistory}
+                  >
+                    {isSavingHistory ? '儲存中...' : '儲存'}
+                  </button>                  
                   )}
                 </div>
               </div>
