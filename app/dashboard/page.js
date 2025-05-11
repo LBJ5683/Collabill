@@ -540,7 +540,6 @@ if (!sumMap.has(key)) {
   }
   async function saveHistoryEdit() {
     setIsSavingHistory(true);
-    const orderMap = new Map();   
   
     for (const id in historyEdit) {
       const updateObj = {};
@@ -550,29 +549,11 @@ if (!sumMap.has(key)) {
         updateObj[key] = value;
       }
   
-      // 找出這筆的名字與原始排序順序
-      const name = historyBills.find(h => h.id === Number(id))?.name;
-      const ori  = bills.find(b => b.name === name);
-      const order = ori?.order ?? 9999;
-      updateObj.order = order;
-  
       await supabase
         .from('bills')
         .update(updateObj)
         .eq('id', id)
         .eq('date', historyDate);
-  
-      orderMap.set(name, order);
-    }
-  
-    const { data: userData } = await supabase.auth.getUser();
-    const user = userData?.user;
-    for (const [name, order] of orderMap) {
-      await supabase
-        .from('bills')
-        .update({ order })
-        .eq('user_id', user.id)
-        .eq('name', name);
     }
   
     setShowHistory(false);
@@ -580,8 +561,7 @@ if (!sumMap.has(key)) {
     fetchBills();
     fetchTodayTotals();
     setIsSavingHistory(false);
-  }
-  
+  }  
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br from-blue-100 to-blue-300">
