@@ -977,18 +977,18 @@ if (!sumMap.has(key)) {
           )}
           <div className="overflow-x-auto rounded-xl shadow-lg bg-white/95 border border-blue-200 max-h-[500px] overflow-auto">
             <table className="min-w-full text-center">
-              <thead className="bg-blue-100 text-blue-700">
-                <tr>
-                  <th className="px-4 py-3">序</th>
-                  <th className="px-4 py-3">姓名</th>
-                  <th className="px-4 py-3">投入金額</th>
-                  <th className="px-4 py-3">食物花費</th>
-                  <th className="px-4 py-3">飲料花費</th>
-                  <th className="px-4 py-3">其他花費</th>
-                  <th className="px-4 py-3">剩餘金額</th>
-                  <th className="px-4 py-3">操作</th>
-                </tr>
-              </thead>
+            <thead className="bg-blue-100 text-blue-700">
+  <tr>
+    <th className="px-4 py-3">序</th>
+    <th className="px-4 py-3">姓名</th>
+    <th className="px-4 py-3">剩餘金額</th>
+    <th className="px-4 py-3">投入金額</th>
+    <th className="px-4 py-3">食物花費</th>
+    <th className="px-4 py-3">飲料花費</th>
+    <th className="px-4 py-3">其他花費</th>
+    <th className="px-4 py-3">操作</th>
+  </tr>
+</thead>
 
               <ReactSortable
   tag="tbody"
@@ -1023,13 +1023,13 @@ if (!sumMap.has(key)) {
   <span className="drag-handle cursor-move text-gray-400 hover:text-gray-600">☰</span>
   {bill.name}
 </td>
+<td className="px-4 py-2 font-bold">
+        {calcRemain(bill) < 0 ? <span className="text-red-600">{calcRemain(bill)}</span> : calcRemain(bill)}
+      </td>
       <td className="px-4 py-2">{bill.amount_in || 0}</td>
       <td className="px-4 py-2">{bill.food || 0}</td>
       <td className="px-4 py-2">{bill.drink || 0}</td>
       <td className="px-4 py-2">{bill.other || 0}</td>
-      <td className="px-4 py-2 font-bold">
-        {calcRemain(bill) < 0 ? <span className="text-red-600">{calcRemain(bill)}</span> : calcRemain(bill)}
-      </td>
       <td className="px-4 py-2">
         <button
           className="text-red-500 hover:text-red-700 font-semibold"
